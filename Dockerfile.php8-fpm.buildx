@@ -1,4 +1,5 @@
-FROM --platform=${BUILDPLATFORM} php:8.0.2-fpm-alpine
+FROM --platform=${BUILDPLATFORM} php:8-fpm-alpine
+#FROM --platform=${BUILDPLATFORM} php:8.0.3-fpm-alpine
 
 ARG BUILDPLATFORM
 
@@ -40,5 +41,5 @@ RUN docker-php-source extract \
 		libbz2 libintl icu-libs libldap libpq libxslt libzip c-client freetype libpng libjpeg-turbo libxpm libwebp \
 		imagemagick-libs xz-libs zstd-libs libmemcached zlib
 
-#docker build -t carlesbarreda/php:8.0.2-fpm-alpine .
-#docker run -ti --rm --name php8-fpm-dev carlesbarreda/php:8.0.2-fpm-alpine /bin/sh
+#docker build -t carlesbarreda/php:8.0.3-fpm-alpine .
+#docker run -ti --rm --name php8-fpm-dev carlesbarreda/php:8.0.3-fpm-alpine /bin/sh
