@@ -1,0 +1,50 @@
+FROM --platform=${BUILDPLATFORM} php:8.0.3-zts-buster
+
+ARG BUILDPLATFORM
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN docker-php-source extract \
+	&& apt-get update && apt-get -y install --no-install-recommends \
+		libbz2-dev libicu-dev libldap2-dev libpq-dev libxslt1-dev libzip-dev libc-client-dev libkrb5-dev \
+		libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev libxpm-dev libmagickwand-dev \
+		libmemcached-dev zlib1g-dev libzstd-dev \
+	&& docker-php-ext-configure gd --with-freetype --with-jpeg --with-xpm --with-webp \
+	&& docker-php-ext-configure imap --with-imap --with-imap-ssl --with-kerberos \
+	&& docker-php-ext-install -j$(nproc) \
+		bz2 bcmath calendar exif gd gettext imap intl ldap mysqli pcntl pdo_mysql pdo_pgsql \
+		shmop sockets sysvmsg sysvsem sysvshm xsl zip \
+	&& docker-php-ext-enable opcache \
+	# imagick
+# use github version for now until release from https://pecl.php.net/get/imagick is ready for PHP 8
+# https://github.com/Imagick/imagick/issues/331#issuecomment-779190777
+# https://github.com/Imagick/imagick/issues/331#issuecomment-785284870
+	&& mkdir -p /usr/src/php/ext/imagick \
+	&& curl -fsSL https://github.com/Imagick/imagick/archive/06116aa24b76edaf6b1693198f79e6c295eda8a9.tar.gz | tar xvz -C "/usr/src/php/ext/imagick" --strip 1 \
+	&& docker-php-ext-install -j$(nproc) imagick \
+	&& rm -rf /usr/src/php/ext/imagick \
+	# apcu igbinary msgpack xdebug
+	&& echo 'no' | pecl install apcu \
+	&& pecl install igbinary \
+	&& pecl install msgpack \
+	&& pecl install xdebug \
+	&& docker-php-ext-enable apcu igbinary msgpack xdebug \
+	# redis memcached
+	&& echo 'yes\nyes\nyes' | pecl install redis \
+	&& echo 'no\nno\nno\nyes\nno\nyes\nno\nyes\nyes' | pecl install memcached \
+	&& docker-php-ext-enable redis memcached \
+	# clean
+	&& pecl clear-cache \
+	&& apt-get -y remove --purge \
+		libbz2-dev libicu-dev libldap2-dev libpq-dev libxslt1-dev libzip-dev libc-client-dev libkrb5-dev \
+		libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev libxpm-dev libmagickwand-dev \
+		libmemcached-dev zlib1g-dev libzstd-dev \
+	&& apt-get -y autoremove --purge \
+	&& docker-php-source delete \
+	# install dependencies
+	&& apt-get -y install --no-install-recommends \
+		libmagickwand-6.q16-6 \
+	&& rm -rf /var/lib/apt/lists/*
+
+#docker build -t carlesbarreda/php:8.0.3-zts-buster .
+#docker run -ti --rm --name php8-zts-dev carlesbarreda/php:8.0.3-zts-buster /bin/sh
