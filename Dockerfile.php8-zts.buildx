@@ -1,4 +1,4 @@
-FROM --platform=${BUILDPLATFORM} php:8.0.3-zts-buster
+FROM --platform=${BUILDPLATFORM} php:8.0.2-zts-buster
 
 ARG BUILDPLATFORM
 
@@ -46,5 +46,5 @@ RUN docker-php-source extract \
 		libmagickwand-6.q16-6 \
 	&& rm -rf /var/lib/apt/lists/*
 
-#docker build -t carlesbarreda/php:8.0.3-zts-buster .
-#docker run -ti --rm --name php8-zts-dev carlesbarreda/php:8.0.3-zts-buster /bin/sh
+#docker build -t carlesbarreda/php:8.0.2-zts-buster .
+#docker run -ti --rm --name php8-zts-dev carlesbarreda/php:8.0.2-zts-buster /bin/sh
