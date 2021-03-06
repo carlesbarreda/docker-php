@@ -1,4 +1,4 @@
-FROM --platform=${BUILDPLATFORM} php:8.0.2-zts-buster
+FROM --platform=${BUILDPLATFORM} php:8.0.3-zts-buster
 
 ARG BUILDPLATFORM
 
@@ -115,5 +115,5 @@ RUN set -ex; \
 		echo 'html_errors = Off'; \
 	} > $PHP_INI_DIR/conf.d/error-logging.ini
 
-#docker build -t carlesbarreda/php:8.0.2-zts-buster -f Dockerfile.php8.0-zts.buildx .
-#docker run -ti --rm --name php8.0-zts-dev carlesbarreda/php:8.0.2-zts-buster /bin/sh
+#docker build -t carlesbarreda/php:8.0.3-zts-buster -f Dockerfile.php8.0-zts.buildx .
+#docker run -ti --rm --name php8.0-zts-dev carlesbarreda/php:8.0.3-zts-buster /bin/sh

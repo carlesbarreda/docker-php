@@ -1,4 +1,4 @@
-FROM --platform=${BUILDPLATFORM} php:7.4.15-fpm-alpine
+FROM --platform=${BUILDPLATFORM} php:7.4.16-fpm-alpine
 
 ARG BUILDPLATFORM
 
@@ -98,5 +98,5 @@ RUN set -ex; \
 		echo 'html_errors = Off'; \
 	} > $PHP_INI_DIR/conf.d/error-logging.ini
 
-#docker build -t carlesbarreda/php:7.4.15-fpm-alpine -f Dockerfile.php7.4-fpm.buildx .
-#docker run -ti --rm --name php7.4-fpm-dev carlesbarreda/php:7.4.15-fpm-alpine /bin/sh
+#docker build -t carlesbarreda/php:7.4.16-fpm-alpine -f Dockerfile.php7.4-fpm.buildx .
+#docker run -ti --rm --name php7.4-fpm-dev carlesbarreda/php:7.4.16-fpm-alpine /bin/sh

@@ -37,21 +37,21 @@ jobs:
           docker buildx build \
             --file Dockerfile.php7.4-fpm.buildx \
             --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
-            --tag carlesbarreda/php:7.4.15-fpm-alpine \
+            --tag carlesbarreda/php:7.4.16-fpm-alpine \
             --tag carlesbarreda/php:7.4-fpm-alpine \
             --tag carlesbarreda/php:7-fpm-alpine \
             --push .
           docker buildx build \
             --file Dockerfile.php7.4-zts.buildx \
             --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
-            --tag carlesbarreda/php:7.4.15-zts-alpine \
+            --tag carlesbarreda/php:7.4.16-zts-alpine \
             --tag carlesbarreda/php:7.4-zts-alpine \
             --tag carlesbarreda/php:7-zts-alpine \
             --push .
           docker buildx build \
             --file Dockerfile.php8.0-fpm.buildx \
             --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
-            --tag carlesbarreda/php:8.0.2-fpm-alpine \
+            --tag carlesbarreda/php:8.0.3-fpm-alpine \
             --tag carlesbarreda/php:8.0-fpm-alpine \
             --tag carlesbarreda/php:8-fpm-alpine \
             --tag carlesbarreda/php:latest \
@@ -59,7 +59,7 @@ jobs:
           docker buildx build \
             --file Dockerfile.php8.0-zts.buildx \
             --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
-            --tag carlesbarreda/php:8.0.2-zts-buster \
+            --tag carlesbarreda/php:8.0.3-zts-buster \
             --tag carlesbarreda/php:8.0-zts-buster \
             --tag carlesbarreda/php:8-zts-buster \
             --push .
