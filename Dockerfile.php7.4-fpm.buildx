@@ -26,7 +26,7 @@ RUN set -ex; \
 		krb5-dev openssl-dev freetype-dev libpng-dev libjpeg-turbo-dev libxpm-dev libwebp-dev \
 		libtool imagemagick-dev xz-dev zstd-dev libmemcached-dev zlib-dev \
 		libedit-dev \
-    ; \
+    || echo "Error !!"; \
     \
 	docker-php-ext-configure gd --with-freetype --with-jpeg --with-xpm --with-webp; \
 	docker-php-ext-configure imap --with-imap --with-imap-ssl --with-kerberos; \
