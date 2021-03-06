@@ -5,8 +5,8 @@ ARG BUILDPLATFORM
 # persistent dependencies
 RUN set -eux; \
     apk add --no-cache \
-        bash \
-        tzdata \
+        #bash \
+        #tzdata \
 	    libbz2 libintl icu-libs libldap libpq libxslt libzip c-client freetype libpng libjpeg-turbo \
 	    libxpm libwebp imagemagick-libs xz-libs zstd-libs libmemcached zlib
 
