@@ -4,14 +4,15 @@ ARG BUILDPLATFORM
 
 ENV DEBIAN_FRONTEND noninteractive
 
-# persistent dependencies
-#RUN set -eux; \
-#    \
-#	apt-get update; \
-#	apt-get install -y --no-install-recommends \
-#		libmagickwand-6.q16-6 \
-#	; \
-#	rm -rf /var/lib/apt/lists/*
+# Persistent dependencies
+RUN set -eux; \
+    \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
+# Ghostscript is required for rendering PDF previews
+		ghostscript \
+	; \
+	rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
 RUN set -ex; \

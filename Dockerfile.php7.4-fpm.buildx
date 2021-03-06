@@ -2,15 +2,20 @@ FROM --platform=${BUILDPLATFORM} php:7.4.16-fpm-alpine
 
 ARG BUILDPLATFORM
 
-# persistent dependencies
+# Persistent dependencies
 RUN set -eux; \
     apk add --no-cache \
-        bash \
+# in theory, docker-entrypoint.sh is POSIX-compliant, but priority is a working, consistent image
+		bash \
+# BusyBox sed is not sufficient for some of our sed expressions
+		sed \
+# Ghostscript is required for rendering PDF previews
+		ghostscript \
+# Alpine package for "imagemagick" contains ~120 .so files, see: https://github.com/docker-library/wordpress/pull/497
+		imagemagick \
         tzdata \
 	    libbz2 libintl icu-libs libldap libpq libxslt libzip c-client freetype libpng libjpeg-turbo \
 	    libxpm libwebp imagemagick-libs xz-libs zstd-libs libmemcached zlib
-
-# autoconf g++ make
 
 # Install dependencies
 RUN set -ex; \
