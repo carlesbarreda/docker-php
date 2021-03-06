@@ -1,6 +1,6 @@
-FROM --platform=${BUILDPLATFORM} php:7.4.16-zts-alpine
+FROM --platform=${TARGETPLATFORM} php:7.4.16-zts-alpine
 
-ARG BUILDPLATFORM
+ARG TARGETPLATFORM
 
 # Persistent dependencies
 RUN set -eux; \

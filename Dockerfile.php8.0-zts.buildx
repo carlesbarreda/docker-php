@@ -1,6 +1,6 @@
-FROM --platform=${BUILDPLATFORM} php:8.0.3-zts-buster
+FROM --platform=${TARGETPLATFORM} php:8.0.3-zts-buster
 
-ARG BUILDPLATFORM
+ARG TARGETPLATFORM
 
 ENV DEBIAN_FRONTEND noninteractive
 

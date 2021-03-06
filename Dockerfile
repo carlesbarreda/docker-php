@@ -1,6 +1,4 @@
-FROM --platform=${TARGETPLATFORM} php:8.0.3-fpm-alpine
-
-ARG TARGETPLATFORM
+FROM php:8.0.3-fpm-alpine
 
 # Persistent dependencies
 RUN set -eux; \
