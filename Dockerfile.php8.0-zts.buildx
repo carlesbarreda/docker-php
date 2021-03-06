@@ -52,6 +52,7 @@ RUN set -ex; \
     \
 	# clean
 	pecl clear-cache; \
+    docker-php-source delete; \
 	apt-get -y remove --purge \
 		libbz2-dev libicu-dev libldap2-dev libpq-dev libxslt1-dev libzip-dev libc-client-dev libkrb5-dev \
 		libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev libxpm-dev libmagickwand-dev \
