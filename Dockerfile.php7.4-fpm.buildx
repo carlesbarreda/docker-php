@@ -1,4 +1,4 @@
-FROM --platform=${TARGETPLATFORM} php:7.4.16-fpm-alpine3.12
+FROM --platform=${TARGETPLATFORM} php:7.4.15-fpm-alpine3.13
 
 ARG TARGETPLATFORM
 
