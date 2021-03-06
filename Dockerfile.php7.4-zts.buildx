@@ -35,7 +35,7 @@ RUN set -ex; \
 	echo -en 'autodetect\n' | pecl install imagick-3.4.4; \
 	pecl install msgpack; \
 	pecl install xdebug; \
-	docker-php-ext-enable apcu igbinary imagick-3.4.4 msgpack xdebug; \
+	docker-php-ext-enable apcu igbinary imagick msgpack xdebug; \
 	# redis memcached
 	echo -en 'yes\nyes\nyes\n' | pecl install redis; \
 	echo -en 'no\nno\nno\nyes\nno\nyes\nno\nyes\nyes\n' | pecl install memcached; \
