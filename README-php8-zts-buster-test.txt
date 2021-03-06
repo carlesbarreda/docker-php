@@ -80,6 +80,18 @@ find / -iname '*ldap*'
 /usr/local/etc/php/conf.d/docker-php-ext-ldap.ini
 
 
+# readline
+apt-get -y install --no-install-recommends libedit-dev
+docker-php-ext-install -j$(nproc) readline
+apt-get -y remove --purge libedit-dev
+
+php -i | egrep -i 'readline'
+find / -iname '*readline*'
+
+/usr/local/lib/php/extensions/no-debug-zts-20200930/readline.so
+/usr/local/etc/php/conf.d/docker-php-ext-readline.ini
+
+
 # mysqli
 docker-php-ext-install -j$(nproc) mysqli
 

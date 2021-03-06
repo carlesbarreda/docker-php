@@ -83,6 +83,19 @@ find / -iname '*ldap*'
 /usr/local/etc/php/conf.d/docker-php-ext-ldap.ini
 
 
+# readline
+apk add --no-cache --virtual=.deps-readline libedit-dev
+docker-php-ext-install -j$(nproc) readline
+apk del .deps-readline
+#apk add --no-cache libedit
+
+php -i | egrep -i 'readline'
+find / -iname '*readline*'
+
+/usr/local/lib/php/extensions/no-debug-non-zts-20200930/readline.so
+/usr/local/etc/php/conf.d/docker-php-ext-readline.ini
+
+
 # mysqli
 docker-php-ext-install -j$(nproc) mysqli
 
