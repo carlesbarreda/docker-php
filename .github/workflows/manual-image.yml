@@ -48,13 +48,13 @@ jobs:
       #      --platform linux/386 \
       #      --tag carlesbarreda/php:7.4.16-fpm-alpine-386 \
       #      --push .
-      - name: Build php:7.4-fpm-alpine-arm64
-        run: |
-          docker buildx build \
-            --file Dockerfile.php7.4-fpm.buildx \
-            --platform linux/arm64 \
-            --tag carlesbarreda/php:7.4.15-fpm-alpine-arm64 \
-            --push .
+      #- name: Build php:7.4-fpm-alpine-arm64
+      #  run: |
+      #    docker buildx build \
+      #      --file Dockerfile.php7.4-fpm.buildx \
+      #      --platform linux/arm64 \
+      #      --tag carlesbarreda/php:7.4.15-fpm-alpine-arm64 \
+      #      --push .
       - name: Build php:7.4-fpm-alpine-arm
         run: |
           docker buildx build \
