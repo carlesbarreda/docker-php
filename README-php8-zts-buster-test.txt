@@ -297,6 +297,7 @@ find / -iname '*imagick*'
 php -r "var_dump(imagick::getVersion());"
 php -r 'print_r(imagick::getVersion());'
 
+php -r 'print_r(Imagick::queryFormats());'
 
 # apcu
 echo 'no' | pecl install apcu

@@ -309,6 +309,7 @@ find / -iname '*imagick*'
 php -r "var_dump(imagick::getVersion());"
 php -r 'print_r(imagick::getVersion());'
 
+php -r 'print_r(Imagick::queryFormats());'
 
 # apcu
 apk --update add --no-cache --virtual=build-dependencies autoconf g++ libtool make
