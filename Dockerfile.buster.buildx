@@ -29,11 +29,10 @@ RUN set -ex; \
     ; \
     \
     find /usr/lib -name '*ldap*.so'; \
-    [[ "${TARGETPLATFORM}" == "linux/386" ]] && ( \
-        ln -s /usr/lib/x86_64-linux-gnu/libldap.so /usr/lib/libldap.so; \
-        ln -s /usr/lib/x86_64-linux-gnu/liblber.so /usr/lib/liblber.so; \
-    ) \
-    ; \
+    if [[ "${TARGETPLATFORM}" = "linux/386" ]]; then; \
+        ln -s /usr/lib/i386-linux-gnu/libldap.so /usr/lib/libldap.so; \
+        ln -s /usr/lib/i386-linux-gnu/liblber.so /usr/lib/liblber.so; \
+    fi; \
 	docker-php-ext-configure gd --with-freetype --with-jpeg --with-xpm --with-webp; \
 	docker-php-ext-configure imap --with-imap --with-imap-ssl --with-kerberos; \
 	docker-php-ext-install -j$(nproc) \
