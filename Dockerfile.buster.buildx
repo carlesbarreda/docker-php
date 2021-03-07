@@ -1,5 +1,6 @@
+ARG VERSION
 ARG VARIANT
-FROM --platform=${TARGETPLATFORM} php:${VARIANT}-buster
+FROM --platform=${TARGETPLATFORM} php:${VERSION}-${VARIANT}-buster
 #FROM --platform=${TARGETPLATFORM} php:8.0.3-fpm-buster
 
 ARG TARGETPLATFORM
@@ -9,10 +10,14 @@ ENV DEBIAN_FRONTEND noninteractive
 # Persistent dependencies
 RUN set -eux; \
     \
+    # https://github.com/docker/buildx/issues/495#issuecomment-772267281
+    #if [ ${TARGETPLATFORM} = linux/arm64 ]; then \
+    #    ln -s /usr/bin/dpkg-split /usr/sbin; \
+    #    ln -s /usr/bin/dpkg-deb /usr/sbin; \
+    #    ln -s /bin/tar /usr/sbin; \
+    #    ln -s /bin/rm /usr/sbin; \
+    #fi; \
 	apt-get update; \
-    if [ ${TARGETPLATFORM} = linux/arm64 ]; then \
-	    apt-get install -y --no-install-recommends apt-utils; \
-    fi; \
 	apt-get install -y --no-install-recommends \
 # Ghostscript is required for rendering PDF previews
 		ghostscript \
@@ -30,11 +35,11 @@ RUN set -ex; \
 		libkrb5-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev libxpm-dev \
 		libmagickwand-dev libmemcached-dev zlib1g-dev libzstd-dev libedit-dev \
     ; \
-    if [ ${TARGETPLATFORM} = linux/386 ]; then \
-        # https://serverfault.com/questions/633394/php-configure-not-finding-ldap-header-libraries
-        ln -s /usr/lib/i386-linux-gnu/libldap.so /usr/lib/libldap.so; \
-        ln -s /usr/lib/i386-linux-gnu/liblber.so /usr/lib/liblber.so; \
-    fi; \
+    # https://serverfault.com/questions/633394/php-configure-not-finding-ldap-header-libraries
+    #if [ ${TARGETPLATFORM} = linux/386 ]; then \
+    #    ln -s /usr/lib/i386-linux-gnu/libldap.so /usr/lib/libldap.so; \
+    #    ln -s /usr/lib/i386-linux-gnu/liblber.so /usr/lib/liblber.so; \
+    #fi; \
 	docker-php-ext-configure gd --with-freetype --with-jpeg --with-xpm --with-webp; \
 	docker-php-ext-configure imap --with-imap --with-imap-ssl --with-kerberos; \
 	docker-php-ext-install -j$(nproc) \
