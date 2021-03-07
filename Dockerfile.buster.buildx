@@ -28,6 +28,11 @@ RUN set -ex; \
 		libmagickwand-dev libmemcached-dev zlib1g-dev libzstd-dev libedit-dev \
     ; \
     \
+    find /usr/lib -name '*ldap*.so'; \
+    ln -s /usr/lib/x86_64-linux-gnu/libldap.so /usr/lib/libldap.so; \
+    && ln -s /usr/lib/x86_64-linux-gnu/liblber.so /usr/lib/liblber.so; \
+    find /usr/lib -name '*ldap*.so'; \
+    \
 	docker-php-ext-configure gd --with-freetype --with-jpeg --with-xpm --with-webp; \
 	docker-php-ext-configure imap --with-imap --with-imap-ssl --with-kerberos; \
 	docker-php-ext-install -j$(nproc) \

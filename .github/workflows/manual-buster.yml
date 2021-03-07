@@ -35,14 +35,14 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Build php:7.4-fpm-buster-amd64
-        run: |
-          docker buildx build \
-            --file Dockerfile.buster.buildx \
-            --platform linux/amd64 \
-            --tag carlesbarreda/php:7.4.16-fpm-buster-amd64 \
-            --build-arg VARIANT=7.4.16-fpm \
-            --push .
+      #- name: Build php:7.4-fpm-buster-amd64
+      #  run: |
+      #    docker buildx build \
+      #      --file Dockerfile.buster.buildx \
+      #      --platform linux/amd64 \
+      #      --tag carlesbarreda/php:7.4.16-fpm-buster-amd64 \
+      #      --build-arg VARIANT=7.4.16-fpm \
+      #      --push .
 
       - name: Build php:7.4-fpm-buster-386
         run: |
