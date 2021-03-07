@@ -29,7 +29,7 @@ RUN set -ex; \
     ; \
     \
     find /usr/lib -name '*ldap*.so'; \
-    [ ${TARGETPLATFORM} == "linux/386" ] && ( \
+    [[ "${TARGETPLATFORM}" == "linux/386" ]] && ( \
         ln -s /usr/lib/x86_64-linux-gnu/libldap.so /usr/lib/libldap.so; \
         ln -s /usr/lib/x86_64-linux-gnu/liblber.so /usr/lib/liblber.so; \
     ) \
