@@ -30,7 +30,7 @@ RUN set -ex; \
     \
     find /usr/lib -name '*ldap*.so'; \
     ln -s /usr/lib/x86_64-linux-gnu/libldap.so /usr/lib/libldap.so; \
-    && ln -s /usr/lib/x86_64-linux-gnu/liblber.so /usr/lib/liblber.so; \
+    ln -s /usr/lib/x86_64-linux-gnu/liblber.so /usr/lib/liblber.so; \
     find /usr/lib -name '*ldap*.so'; \
     \
 	docker-php-ext-configure gd --with-freetype --with-jpeg --with-xpm --with-webp; \
