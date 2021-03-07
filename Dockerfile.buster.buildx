@@ -10,6 +10,9 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN set -eux; \
     \
 	apt-get update; \
+    if [ ${TARGETPLATFORM} = linux/arm64 ]; then \
+	    apt-get install -y --no-install-recommends apt-utils; \
+    fi; \
 	apt-get install -y --no-install-recommends \
 # Ghostscript is required for rendering PDF previews
 		ghostscript \
@@ -27,10 +30,8 @@ RUN set -ex; \
 		libkrb5-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev libxpm-dev \
 		libmagickwand-dev libmemcached-dev zlib1g-dev libzstd-dev libedit-dev \
     ; \
-    \
-    find /usr/lib -name '*ldap*.so'; \
-    find /usr/lib -name '*lber*.so'; \
     if [ ${TARGETPLATFORM} = linux/386 ]; then \
+        # https://serverfault.com/questions/633394/php-configure-not-finding-ldap-header-libraries
         ln -s /usr/lib/i386-linux-gnu/libldap.so /usr/lib/libldap.so; \
         ln -s /usr/lib/i386-linux-gnu/liblber.so /usr/lib/liblber.so; \
     fi; \
