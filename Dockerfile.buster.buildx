@@ -1,7 +1,6 @@
 ARG VERSION
 ARG VARIANT
 FROM --platform=${TARGETPLATFORM} php:${VERSION}-${VARIANT}-buster
-#FROM --platform=${TARGETPLATFORM} php:8.0.3-fpm-buster
 
 ARG TARGETPLATFORM
 
@@ -130,6 +129,3 @@ RUN set -ex; \
 		echo 'ignore_repeated_source = Off'; \
 		echo 'html_errors = Off'; \
 	} > $PHP_INI_DIR/conf.d/error-logging.ini
-
-#docker build -t carlesbarreda/php:8.0.3-zts-buster -f Dockerfile.php8.0-zts.buildx .
-#docker run -ti --rm --name php8.0-zts-dev carlesbarreda/php:8.0.3-zts-buster /bin/sh
