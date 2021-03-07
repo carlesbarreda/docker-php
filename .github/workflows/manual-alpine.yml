@@ -41,12 +41,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Build php:7.4-fpm-alpine-386
+      - name: Build php:7.4-fpm-alpine-amd64
         run: |
           docker buildx build \
             --file Dockerfile.alpine.buildx \
-            --platform linux/386 \
-            --tag carlesbarreda/php:7.4.16-fpm-alpine-386 \
+            --platform linux/amd64 \
+            --tag carlesbarreda/php:7.4.16-fpm-alpine-amd64 \
             --build-arg VERSION=7.4.16 \
             --build-arg VARIANT=fpm \
             --progress=plain \
