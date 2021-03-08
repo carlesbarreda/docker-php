@@ -1,18 +1,16 @@
 name: Test trigger docker CI
 
 on:
-
   workflow_dispatch:
+  check_run:
 
 jobs:
-
   job1:
     name: "Trigger dockerhook"
     runs-on: ubuntu-latest
     steps:
-      - name: Adding custom builder
+      - name: Trigger docker hub build
         run: |
-          #curl --data build=true -X POST https://hub.docker.com/api/build/v1/source/da887842-4973-4f57-a0ed-86ce3de097ed/trigger/26a41857-b0e1-40a4-85e0-b7f38719e5c2/call/
           curl -H "Content-Type: application/json" \
             --data '{"source_type": "Branch", "source_name": "main"}' \
             -X POST "https://hub.docker.com/api/build/v1/source/da887842-4973-4f57-a0ed-86ce3de097ed/trigger/26a41857-b0e1-40a4-85e0-b7f38719e5c2/call/";
