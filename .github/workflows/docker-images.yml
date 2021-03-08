@@ -1,4 +1,4 @@
-name: PHP 7.4/8.0 image sets CI
+name: PHP 7.4 / 8.0 image sets CI
 
 on:
 
