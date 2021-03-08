@@ -16,10 +16,10 @@ jobs:
       - name: Set env
         run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
       - name: Test $PHP74
-        if: PHP74 != ''
+        if: ${{ env.PHP74 != '' }}
         run: echo Testing owner/name:$PHP74-tag
       - name: Test $PHP80
-        if: PHP80 != ''
+        if: ${{ env.PHP80 != '' }}
         run: echo Testing owner/name:$PHP80-tag
 
   job2:
@@ -34,8 +34,8 @@ jobs:
       - name: Set env from file
         run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
       - name: Test $PHP74
-        if: PHP74 != ''
+        if: ${{ env.PHP74 != '' }}
         run: echo Testing owner/name:$PHP74-tag
       - name: Test $PHP80
-        if: PHP80 != ''
+        if: ${{ env.PHP80 != '' }}
         run: echo Testing owner/name:$PHP80-tag

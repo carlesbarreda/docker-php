@@ -46,7 +46,7 @@ jobs:
       - name: Set env from file
         run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
       - name: Build php:7.4-zts-buster
-        if: PHP74 != ''
+        if: ${{ env.PHP74 != '' }}
         run: |
           docker buildx build \
             --file Dockerfile.buster.buildx \
@@ -59,7 +59,7 @@ jobs:
             --no-cache \
             --push .
       - name: Build php:7.4-fpm-buster
-        if: PHP74 != ''
+        if: ${{ env.PHP74 != '' }}
         run: |
           docker buildx build \
             --file Dockerfile.buster.buildx \
@@ -97,7 +97,7 @@ jobs:
       - name: Set env from file
         run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
       - name: Build php:7.4-zts-alpine
-        if: PHP74 != ''
+        if: ${{ env.PHP74 != '' }}
         run: |
           docker buildx build \
             --file Dockerfile.alpine.buildx \
@@ -110,7 +110,7 @@ jobs:
             --no-cache \
             --push .
       - name: Build php:7.4-fpm-alpine
-        if: PHP74 != ''
+        if: ${{ env.PHP74 != '' }}
         run: |
           docker buildx build \
             --file Dockerfile.alpine.buildx \
@@ -148,7 +148,7 @@ jobs:
       - name: Set env from file
         run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
       - name: Build php:8.0-zts-buster
-        if: PHP80 != ''
+        if: ${{ env.PHP80 != '' }}
         run: |
           docker buildx build \
             --file Dockerfile.buster.buildx \
@@ -161,7 +161,7 @@ jobs:
             --no-cache \
             --push .
       - name: Build php:8.0-fpm-buster
-        if: PHP80 != ''
+        if: ${{ env.PHP80 != '' }}
         run: |
           docker buildx build \
             --file Dockerfile.buster.buildx \
@@ -199,7 +199,7 @@ jobs:
       - name: Set env from file
         run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
       - name: Build php:8.0-fpm-alpine
-        if: PHP80 != ''
+        if: ${{ env.PHP80 != '' }}
         run: |
           docker buildx build \
             --file Dockerfile.alpine.buildx \
