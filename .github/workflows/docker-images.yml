@@ -49,7 +49,7 @@ jobs:
         if: ${{ env.PHP74 != '' }}
         run: |
           docker buildx build \
-            --file Dockerfile.buster.buildx \
+            --file Dockerfile.buster \
             --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
             --tag carlesbarreda/php:$PHP74-zts-buster \
             --tag carlesbarreda/php:7.4-zts-buster \
@@ -62,7 +62,7 @@ jobs:
         if: ${{ env.PHP74 != '' }}
         run: |
           docker buildx build \
-            --file Dockerfile.buster.buildx \
+            --file Dockerfile.buster \
             --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
             --tag carlesbarreda/php:$PHP74-fpm-buster \
             --tag carlesbarreda/php:7.4-fpm-buster \
@@ -100,7 +100,7 @@ jobs:
         if: ${{ env.PHP74 != '' }}
         run: |
           docker buildx build \
-            --file Dockerfile.alpine.buildx \
+            --file Dockerfile.alpine \
             --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
             --tag carlesbarreda/php:$PHP74-zts-alpine \
             --tag carlesbarreda/php:7.4-zts-alpine \
@@ -113,7 +113,7 @@ jobs:
         if: ${{ env.PHP74 != '' }}
         run: |
           docker buildx build \
-            --file Dockerfile.alpine.buildx \
+            --file Dockerfile.alpine \
             --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
             --tag carlesbarreda/php:$PHP74-fpm-alpine \
             --tag carlesbarreda/php:7.4-fpm-alpine \
@@ -152,7 +152,7 @@ jobs:
         if: ${{ env.PHP80 != '' }}
         run: |
           docker buildx build \
-            --file Dockerfile.buster.buildx \
+            --file Dockerfile.buster \
             --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
             --tag carlesbarreda/php:$PHP80-zts-buster \
             --tag carlesbarreda/php:8.0-zts-buster \
@@ -165,7 +165,7 @@ jobs:
         if: ${{ env.PHP80 != '' }}
         run: |
           docker buildx build \
-            --file Dockerfile.buster.buildx \
+            --file Dockerfile.buster \
             --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
             --tag carlesbarreda/php:$PHP80-fpm-buster \
             --tag carlesbarreda/php:8.0-fpm-buster \
@@ -210,7 +210,7 @@ jobs:
         if: ${{ env.PHP80 != '' }}
         run: |
           docker buildx build \
-            --file Dockerfile.alpine.buildx \
+            --file Dockerfile.alpine \
             --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
             --tag carlesbarreda/php:$PHP80-fpm-alpine \
             --tag carlesbarreda/php:8.0-fpm-alpine \
