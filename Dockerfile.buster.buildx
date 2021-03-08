@@ -15,12 +15,12 @@ RUN set -eux; \
         ln -s /usr/lib/i386-linux-gnu/liblber.so /usr/lib/liblber.so; \
     fi; \
     # https://github.com/docker/buildx/issues/495#issuecomment-772267281
-    if [ ${TARGETPLATFORM} = linux/arm64 ]; then \
+    #if [ ${TARGETPLATFORM} = linux/arm64 ]; then \
         ln -s /usr/bin/dpkg-split /usr/sbin; \
         ln -s /usr/bin/dpkg-deb /usr/sbin; \
         ln -s /bin/tar /usr/sbin; \
         ln -s /bin/rm /usr/sbin; \
-    fi; \
+    #fi; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
 # Ghostscript is required for rendering PDF previews
