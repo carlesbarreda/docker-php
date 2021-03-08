@@ -21,6 +21,7 @@ on:
 jobs:
 
   Buster74:
+    name: "PHP 7.4 buster"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -68,6 +69,7 @@ jobs:
             --push .
 
   Alpine74:
+    name: "PHP 7.4 alpine"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -115,6 +117,7 @@ jobs:
             --push .
 
   Buster80:
+    name: "PHP 8.0 buster"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -162,6 +165,7 @@ jobs:
             --push .
 
   Alpine80:
+    name: "PHP 8.0 alpine"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

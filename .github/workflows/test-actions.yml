@@ -1,0 +1,47 @@
+name: Testing CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  job1:
+    name: Job 1 of 2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # https://github.com/actions/starter-workflows/issues/68
+      # https://github.com/firepress-org/rclone-in-docker/blob/master/.github/workflows/ci_dockerfile_is_master.yml
+      - name: Set env
+        run: |
+          # Hard coded variable
+          echo "ENVFILE=.env.build" >> $GITHUB_ENV
+          # Logically defined variable from the Dockerfile
+          echo "PHP74=$(grep PHP74= $ENVFILE | head -n 1 | grep -o '".*"' | sed 's/"//g')" >> $GITHUB_ENV
+          echo "PHP80=$(grep PHP80= $ENVFILE | head -n 1 | grep -o '".*"' | sed 's/"//g')" >> $GITHUB_ENV
+      - name: Test $PHP74
+        run: echo Testing $PHP74
+      - name: Test $PHP80
+        run: echo Testing $PHP80
+
+  job2:
+    name: Job 2 of 2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # https://github.com/actions/starter-workflows/issues/68
+      # https://github.com/firepress-org/rclone-in-docker/blob/master/.github/workflows/ci_dockerfile_is_master.yml
+      - name: Set env
+        run: |
+          # Hard coded variable
+          echo "ENVFILE=.env.build" >> $GITHUB_ENV
+          # Logically defined variable from the Dockerfile
+          echo "PHP74=$(grep PHP74= $ENVFILE | head -n 1 | grep -o '".*"' | sed 's/"//g')" >> $GITHUB_ENV
+          echo "PHP80=$(grep PHP80= $ENVFILE | head -n 1 | grep -o '".*"' | sed 's/"//g')" >> $GITHUB_ENV
+      - name: Test $PHP74
+        run: echo Testing $PHP74
+      - name: Test $PHP80
+        run: echo Testing $PHP80
