@@ -15,9 +15,9 @@ export DOCKER_BUILDKIT=1
 
 env
 
-#echo "Adding custom builder"
-#docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-#docker buildx create --name multiarch --driver docker-container --use
+echo "Adding custom builder"
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+docker buildx create --name multiarch --driver docker-container --use
 
 echo "Build php:7.4-fpm-buster"
 docker buildx build \
