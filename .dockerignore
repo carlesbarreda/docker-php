@@ -2,5 +2,5 @@
 .git
 .github
 .gitattributes
-Dpckerfile*
+Dockerfile*
 README-*
