@@ -13,15 +13,13 @@ set -x
 source .env.build
 export DOCKER_BUILDKIT=1
 
-echo "Adding custom builder"
-docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-docker buildx create --name multiarch --driver docker-container --use
+env
+
+#echo "Adding custom builder"
+#docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+#docker buildx create --name multiarch --driver docker-container --use
 
 echo "Build php:7.4-fpm-buster"
-docker build --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-             --build-arg VCS_REF=`git rev-parse --short HEAD` \
-             --tag $IMAGE_NAME \
-
 docker buildx build \
     --file $DOCKERFILE_PATH \
     --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
