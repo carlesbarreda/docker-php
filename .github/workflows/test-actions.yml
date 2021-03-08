@@ -14,16 +14,11 @@ jobs:
       # https://github.com/actions/starter-workflows/issues/68
       # https://github.com/firepress-org/rclone-in-docker/blob/master/.github/workflows/ci_dockerfile_is_master.yml
       - name: Set env
-        run: |
-          # Hard coded variable
-          echo "ENVFILE=.env.build" >> $GITHUB_ENV
-          # Logically defined variable from the Dockerfile
-          echo "PHP74=$(grep PHP74= $ENVFILE | head -n 1 | grep -o '".*"' | sed 's/"//g')" >> $GITHUB_ENV
-          echo "PHP80=$(grep PHP80= $ENVFILE | head -n 1 | grep -o '".*"' | sed 's/"//g')" >> $GITHUB_ENV
+        run: cat .env.build | grep PHP74 >> $GITHUB_ENV
       - name: Test $PHP74
-        run: echo Testing $PHP74
+        run: echo Testing owner/name:$PHP74-tag
       - name: Test $PHP80
-        run: echo Testing $PHP80
+        run: echo Testing owner/name:$PHP80-tag
 
   job2:
     name: Job 2 of 2
@@ -34,11 +29,9 @@ jobs:
 
       # https://github.com/actions/starter-workflows/issues/68
       # https://github.com/firepress-org/rclone-in-docker/blob/master/.github/workflows/ci_dockerfile_is_master.yml
-      - name: Set env
-        run: |
-          # Hard coded variable
-          cat .env.build >> $GITHUB_ENV
+      - name: Set env from file
+        run: cat .env.build | grep PHP80 >> $GITHUB_ENV
       - name: Test $PHP74
-        run: echo Testing $PHP74
+        run: echo Testing owner/name:$PHP74-tag
       - name: Test $PHP80
-        run: echo Testing $PHP80
+        run: echo Testing owner/name:$PHP80-tag
