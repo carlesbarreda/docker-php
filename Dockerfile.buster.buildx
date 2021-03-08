@@ -15,7 +15,7 @@ RUN set -eux; \
         ln -s /usr/lib/i386-linux-gnu/liblber.so /usr/lib/liblber.so; \
     fi; \
     # https://github.com/docker/buildx/issues/495#issuecomment-772267281
-    if [ ${TARGETPLATFORM} = linux/arm64 ]; then \
+    if [ ${TARGETPLATFORM} = linux/arm64 || ${TARGETPLATFORM} = linux/arm/v7 ]; then \
         ln -s /usr/bin/dpkg-split /usr/sbin; \
         ln -s /usr/bin/dpkg-deb /usr/sbin; \
         ln -s /bin/tar /usr/sbin; \
