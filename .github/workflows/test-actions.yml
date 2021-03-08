@@ -14,10 +14,12 @@ jobs:
       # https://github.com/actions/starter-workflows/issues/68
       # https://github.com/firepress-org/rclone-in-docker/blob/master/.github/workflows/ci_dockerfile_is_master.yml
       - name: Set env
-        run: cat .env.build | grep PHP74 >> $GITHUB_ENV
+        run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
       - name: Test $PHP74
+        if: PHP74 != ''
         run: echo Testing owner/name:$PHP74-tag
       - name: Test $PHP80
+        if: PHP80 != ''
         run: echo Testing owner/name:$PHP80-tag
 
   job2:
@@ -30,8 +32,10 @@ jobs:
       # https://github.com/actions/starter-workflows/issues/68
       # https://github.com/firepress-org/rclone-in-docker/blob/master/.github/workflows/ci_dockerfile_is_master.yml
       - name: Set env from file
-        run: cat .env.build | grep PHP80 >> $GITHUB_ENV
+        run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
       - name: Test $PHP74
+        if: PHP74 != ''
         run: echo Testing owner/name:$PHP74-tag
       - name: Test $PHP80
+        if: PHP80 != ''
         run: echo Testing owner/name:$PHP80-tag
