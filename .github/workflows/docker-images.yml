@@ -174,8 +174,10 @@ jobs:
             --no-cache \
             --push .
 
+  # This is the last job
   Alpine80:
     name: "PHP 8.0 alpine"
+    needs: [Buster74, Alpine74, Buster80]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -195,6 +197,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Trigger docker hub build
+        run: |
+          curl -H "Content-Type: application/json" \
+            --data '{"source_type": "Branch", "source_name": "main"}' \
+            -X POST "https://hub.docker.com/api/build/v1/source/da887842-4973-4f57-a0ed-86ce3de097ed/trigger/26a41857-b0e1-40a4-85e0-b7f38719e5c2/call/";
       # https://github.com/actions/starter-workflows/issues/68
       - name: Set env from file
         run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
