@@ -37,10 +37,7 @@ jobs:
       - name: Set env
         run: |
           # Hard coded variable
-          echo "ENVFILE=.env.build" >> $GITHUB_ENV
-          # Logically defined variable from the Dockerfile
-          echo "PHP74=$(grep PHP74= $ENVFILE | head -n 1 | grep -o '".*"' | sed 's/"//g')" >> $GITHUB_ENV
-          echo "PHP80=$(grep PHP80= $ENVFILE | head -n 1 | grep -o '".*"' | sed 's/"//g')" >> $GITHUB_ENV
+          cat .env.build >> $GITHUB_ENV
       - name: Test $PHP74
         run: echo Testing $PHP74
       - name: Test $PHP80
