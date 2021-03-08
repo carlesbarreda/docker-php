@@ -1,0 +1,14 @@
+name: Test trigger docker CI
+
+on:
+
+  workflow_dispatch:
+
+jobs:
+
+  job1:
+    name: "Trigger dockerhook"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Adding custom builder
+        run: wget "https://hub.docker.com/api/build/v1/source/da887842-4973-4f57-a0ed-86ce3de097ed/trigger/0c1a55a9-84a9-440c-a2b3-f2256bb3e7f1/call/"
