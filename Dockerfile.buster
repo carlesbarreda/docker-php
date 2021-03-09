@@ -31,6 +31,14 @@ RUN set -eux; \
 # Install dependencies
 RUN set -ex; \
     \
+    # https://github.com/docker/buildx/issues/495#issuecomment-772267281
+    if [ ${TARGETPLATFORM} = linux/arm64 || ${TARGETPLATFORM} = linux/arm/v7 ]; then \
+        ln -s /usr/bin/dpkg-split /usr/sbin; \
+        ln -s /usr/bin/dpkg-deb /usr/sbin; \
+        ln -s /bin/tar /usr/sbin; \
+        ln -s /bin/rm /usr/sbin; \
+    fi; \
+    \
     savedAptMark="$(apt-mark showmanual)"; \
     \
     apt-get update; \
