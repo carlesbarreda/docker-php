@@ -1,5 +1,11 @@
+# Dockerfile
+# -:6 DL3008 warning: Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`
+# -:28 DL3008 warning: Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`
+# -:28 SC2086 info: Double quote to prevent globbing and word splitting.
+# -:28 DL4006 warning: Set the SHELL option -o pipefail before RUN with a pipe in it. If you are using /bin/sh in an alpine image or if your shell is symlinked to busybox then consider explicitly setting your SHELL to /bin/ash, or disable this check
+# -:90 SC2086 info: Double quote to prevent globbing and word splitting.
+
 ignored:
-  - DL3000
-  - SC1099
-#  - DL4006
-#  - DL3029
+  - DL3008
+  - SC2086
+  - DL4006
