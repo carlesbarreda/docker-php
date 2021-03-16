@@ -520,7 +520,7 @@ jobs:
 
   Buster80:
     name: "PHP 8.0 buster"
-    needs: [Buster74]
+    needs: [ScanBuster80]
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
@@ -692,7 +692,7 @@ jobs:
 
   Alpine80:
     name: "PHP 8.0 alpine"
-    needs: [Alpine74]
+    needs: [ScanAlpine80]
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
