@@ -87,7 +87,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster-amd64
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (amd64)
         uses: aquasecurity/trivy-action@master
@@ -112,7 +113,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster-386
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (386)
         uses: aquasecurity/trivy-action@master
@@ -137,7 +139,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster-arm64
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (arm64)
         uses: aquasecurity/trivy-action@master
@@ -162,7 +165,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster-armv7
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (armv7)
         uses: aquasecurity/trivy-action@master
@@ -173,6 +177,13 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+
+      - name: Archive buildx cache
+        uses: actions/upload-artifact@v2
+        with:
+          name: buildx-cache-buster74
+          path: |
+            ./.buildx-cache
 
   Buster74:
     name: "PHP 7.4 buster"
@@ -202,6 +213,11 @@ jobs:
       - name: Set env from file
         run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
 
+      - name: Download buildx cache
+        uses: actions/download-artifact@v2
+        with:
+          name: buildx-cache-buster74
+
       - name: Build php7.4-fpm-buster
         if: ${{ env.PHP74 != '' }}
         uses: docker/build-push-action@v2
@@ -216,6 +232,7 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster
             ${{ env.IMAGE_NAME }}:7.4-fpm-buster
           no-cache: false
+          cache-from: type=local,src=./.buildx-cache
           push: true
 
   ScanAlpine74:
@@ -259,7 +276,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-amd64
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (amd64)
         uses: aquasecurity/trivy-action@master
@@ -284,7 +302,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-386
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (386)
         uses: aquasecurity/trivy-action@master
@@ -309,7 +328,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-arm64
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (arm64)
         uses: aquasecurity/trivy-action@master
@@ -334,7 +354,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-armv7
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (armv7)
         uses: aquasecurity/trivy-action@master
@@ -345,6 +366,13 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+
+      - name: Archive BuildX cache
+        uses: actions/upload-artifact@v2
+        with:
+          name: buildx-cache-alpine74
+          path: |
+            ./.buildx-cache
 
   Alpine74:
     name: "PHP 7.4 alpine"
@@ -374,6 +402,11 @@ jobs:
       - name: Set env from file
         run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
 
+      - name: Download buildx cache
+        uses: actions/download-artifact@v2
+        with:
+          name: buildx-cache-alpine74
+
       - name: Build php7.4-fpm-alpine
         if: ${{ env.PHP74 != '' }}
         uses: docker/build-push-action@v2
@@ -388,6 +421,7 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine
             ${{ env.IMAGE_NAME }}:7.4-fpm-alpine
           no-cache: false
+          cache-from: type=local,src=./.buildx-cache
           push: true
 
   ScanBuster80:
@@ -431,7 +465,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-amd64
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (amd64)
         uses: aquasecurity/trivy-action@master
@@ -456,7 +491,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-386
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (386)
         uses: aquasecurity/trivy-action@master
@@ -481,7 +517,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-arm64
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (arm64)
         uses: aquasecurity/trivy-action@master
@@ -506,7 +543,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-armv7
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (armv7)
         uses: aquasecurity/trivy-action@master
@@ -517,6 +555,13 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+
+      - name: Archive BuildX cache
+        uses: actions/upload-artifact@v2
+        with:
+          name: buildx-cache-buster80
+          path: |
+            ./.buildx-cache
 
   Buster80:
     name: "PHP 8.0 buster"
@@ -546,6 +591,11 @@ jobs:
       - name: Set env from file
         run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
 
+      - name: Download buildx cache
+        uses: actions/download-artifact@v2
+        with:
+          name: buildx-cache-buster80
+
       - name: Build php8.0-fpm-buster
         if: ${{ env.PHP80 != '' }}
         uses: docker/build-push-action@v2
@@ -560,6 +610,7 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster
             ${{ env.IMAGE_NAME }}:8.0-fpm-buster
           no-cache: false
+          cache-from: type=local,src=./.buildx-cache
           push: true
 
   ScanAlpine80:
@@ -603,7 +654,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-amd64
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (amd64)
         uses: aquasecurity/trivy-action@master
@@ -628,7 +680,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-386
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (386)
         uses: aquasecurity/trivy-action@master
@@ -653,7 +706,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-arm64
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (arm64)
         uses: aquasecurity/trivy-action@master
@@ -678,7 +732,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-armv7
           no-cache: false
-          push: true
+          cache-to: type=local,dest=./.buildx-cache
+          load: true
 
       - name: Run Trivy vulnerability scanner (armv7)
         uses: aquasecurity/trivy-action@master
@@ -689,6 +744,13 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+
+      - name: Archive BuildX cache
+        uses: actions/upload-artifact@v2
+        with:
+          name: buildx-cache-alpine80
+          path: |
+            ./.buildx-cache
 
   Alpine80:
     name: "PHP 8.0 alpine"
@@ -724,6 +786,11 @@ jobs:
       - name: Set env from file
         run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
 
+      - name: Download buildx cache
+        uses: actions/download-artifact@v2
+        with:
+          name: buildx-cache-alpine80
+
       - name: Build php8.0-fpm-alpine
         if: ${{ env.PHP80 != '' }}
         uses: docker/build-push-action@v2
@@ -739,4 +806,5 @@ jobs:
             ${{ env.IMAGE_NAME }}:8.0-fpm-alpine
             ${{ env.IMAGE_NAME }}:latest
           no-cache: false
+          cache-from: type=local,src=./.buildx-cache
           push: true
