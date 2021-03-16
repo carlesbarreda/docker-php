@@ -11,6 +11,8 @@
 # -:23 DL3018 warning: Pin versions in apk add. Instead of `apk add <package>` use `apk add <package>=<version>`
 # -:23 DL3019 info: Use the `--no-cache` switch to avoid the need to use `--update` and remove `/var/cache/apk/*` when done installing packages
 
+# Lint Dockerfile.buster
+# -:10 SC2109 error: Instead of [ a || b ], use [ a ] || [ b ].
 ignored:
   - DL3008
   - SC2086
@@ -18,3 +20,4 @@ ignored:
   - DL3029
   - DL3018
   - DL3019
+  - SC2109
