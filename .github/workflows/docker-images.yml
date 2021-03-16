@@ -427,7 +427,7 @@ jobs:
   ScanBuster80:
     name: "Scan PHP 8.0 buster"
     runs-on: ubuntu-20.04
-    needs: [Buster74]
+    needs: [lint]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -616,7 +616,7 @@ jobs:
   ScanAlpine80:
     name: "Scan PHP 8.0 alpine"
     runs-on: ubuntu-20.04
-    needs: [Alpine74]
+    needs: [lint]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
