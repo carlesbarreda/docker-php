@@ -18,84 +18,505 @@ on:
 
   workflow_dispatch:
 
+env:
+  IMAGE_NAME: carlesbarreda/php
+
 jobs:
+  lint:
+    name: Lint Dockerfile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      #- name: Lint Dockerfile
+      #  uses: brpaz/hadolint-action@v1.2.1
+      #  with:
+      #    dockerfile: Dockerfile
+
+      - name: Lint Dockerfile
+        run: |
+          docker run --rm -i -v ${PWD}/.hadolint.yml:/root/.config/hadolint.yaml hadolint/hadolint < Dockerfile
+
+      - name: Lint Dockerfile.alpine
+        run: |
+          docker run --rm -i -v ${PWD}/.hadolint.yml:/root/.config/hadolint.yaml hadolint/hadolint < Dockerfile.alpine
+
+      - name: Lint Dockerfile.buster
+        run: |
+          docker run --rm -i -v ${PWD}/.hadolint.yml:/root/.config/hadolint.yaml hadolint/hadolint < Dockerfile.buster
+
+  ScanBuster74:
+    name: "Scan PHP 7.4 buster"
+    runs-on: ubuntu-20.04
+    needs: [lint]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Set env from file
+        run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
+
+      - name: Scan php7.4-fpm-buster-amd64
+        if: ${{ env.PHP74 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.buster
+          platforms: linux/amd64
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster-amd64
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (amd64)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster-amd64'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan php7.4-fpm-buster-386
+        if: ${{ env.PHP74 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.buster
+          platforms: linux/386
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster-386
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (386)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster-386'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan php7.4-fpm-buster-arm64
+        if: ${{ env.PHP74 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.buster
+          platforms: linux/arm64
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster-arm64
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (arm64)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster-arm64'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan php7.4-fpm-buster-armv7
+        if: ${{ env.PHP74 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.buster
+          platforms: linux/arm/v7
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster-armv7
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (armv7)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster-armv7'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
   Buster74:
     name: "PHP 7.4 buster"
     runs-on: ubuntu-20.04
+    needs: [ScanBuster74]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      # https://github.com/docker/setup-buildx-action
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      # https://github.com/docker/buildx/issues/495#issuecomment-761562905
-      - name: Adding custom builder
-        run: |
-          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker buildx create --name multiarch --driver docker-container --use
-          docker buildx inspect --bootstrap
-      # https://github.com/docker/login-action
+        with:
+          install: true
+
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      # https://github.com/actions/starter-workflows/issues/68
-      # https://github.com/firepress-org/rclone-in-docker/blob/master/.github/workflows/ci_dockerfile_is_master.yml
+
       - name: Set env from file
         run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
-      - name: Build php:7.4-fpm-buster
+
+      - name: Build php7.4-fpm-buster
         if: ${{ env.PHP74 != '' }}
-        run: |
-          docker buildx build \
-            --file Dockerfile.buster \
-            --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
-            --tag carlesbarreda/php:$PHP74-fpm-buster \
-            --tag carlesbarreda/php:7.4-fpm-buster \
-            --build-arg VERSION=$PHP74 \
-            --build-arg VARIANT=fpm \
-            --progress=plain \
-            --no-cache \
-            --push .
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.buster
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-buster
+            ${{ env.IMAGE_NAME }}:7.4-fpm-buster
+          no-cache: false
+          push: true
+
+  ScanAlpine74:
+    name: "Scan PHP 7.4 alpine"
+    runs-on: ubuntu-20.04
+    needs: [lint]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Set env from file
+        run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
+
+      - name: Scan php7.4-fpm-alpine-amd64
+        if: ${{ env.PHP74 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.alpine
+          platforms: linux/amd64
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-amd64
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (amd64)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-amd64'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan php7.4-fpm-alpine-386
+        if: ${{ env.PHP74 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.alpine
+          platforms: linux/386
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-386
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (386)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-386'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan php7.4-fpm-alpine-arm64
+        if: ${{ env.PHP74 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.alpine
+          platforms: linux/arm64
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-arm64
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (arm64)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-arm64'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan php7.4-fpm-alpine-armv7
+        if: ${{ env.PHP74 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.alpine
+          platforms: linux/arm/v7
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-armv7
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (armv7)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-armv7'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
   Alpine74:
     name: "PHP 7.4 alpine"
     runs-on: ubuntu-20.04
+    needs: [ScanAlpine74]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      # https://github.com/docker/setup-buildx-action
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      # https://github.com/docker/buildx/issues/495#issuecomment-761562905
-      - name: Adding custom builder
-        run: |
-          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker buildx create --name multiarch --driver docker-container --use
-          docker buildx inspect --bootstrap
-      # https://github.com/docker/login-action
+        with:
+          install: true
+
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      # https://github.com/actions/starter-workflows/issues/68
+
       - name: Set env from file
         run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
-      - name: Build php:7.4-fpm-alpine
+
+      - name: Build php7.4-fpm-alpine
         if: ${{ env.PHP74 != '' }}
-        run: |
-          docker buildx build \
-            --file Dockerfile.alpine \
-            --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
-            --tag carlesbarreda/php:$PHP74-fpm-alpine \
-            --tag carlesbarreda/php:7.4-fpm-alpine \
-            --build-arg VERSION=$PHP74 \
-            --build-arg VARIANT=fpm \
-            --progress=plain \
-            --no-cache \
-            --push .
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.alpine
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine
+            ${{ env.IMAGE_NAME }}:7.4-fpm-alpine
+          no-cache: false
+          push: true
+
+  ScanBuster80:
+    name: "Scan PHP 8.0 buster"
+    runs-on: ubuntu-20.04
+    needs: [Buster74]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Set env from file
+        run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
+
+      - name: Scan php8.0-fpm-buster-amd64
+        if: ${{ env.PHP80 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.buster
+          platforms: linux/amd64
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-amd64
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (amd64)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-amd64'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan php8.0-fpm-buster-386
+        if: ${{ env.PHP80 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.buster
+          platforms: linux/386
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-386
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (386)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-386'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan php8.0-fpm-buster-arm64
+        if: ${{ env.PHP80 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.buster
+          platforms: linux/arm64
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-arm64
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (arm64)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-arm64'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan php8.0-fpm-buster-armv7
+        if: ${{ env.PHP80 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.buster
+          platforms: linux/arm/v7
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-armv7
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (armv7)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-armv7'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
   Buster80:
     name: "PHP 8.0 buster"
@@ -104,37 +525,170 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      # https://github.com/docker/setup-buildx-action
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      # https://github.com/docker/buildx/issues/495#issuecomment-761562905
-      - name: Adding custom builder
-        run: |
-          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker buildx create --name multiarch --driver docker-container --use
-          docker buildx inspect --bootstrap
-      # https://github.com/docker/login-action
+        with:
+          install: true
+
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      # https://github.com/actions/starter-workflows/issues/68
+
       - name: Set env from file
         run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
-      - name: Build php:8.0-fpm-buster
+
+      - name: Build php8.0-fpm-buster
         if: ${{ env.PHP80 != '' }}
-        run: |
-          docker buildx build \
-            --file Dockerfile.buster \
-            --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
-            --tag carlesbarreda/php:$PHP80-fpm-buster \
-            --tag carlesbarreda/php:8.0-fpm-buster \
-            --build-arg VERSION=$PHP80 \
-            --build-arg VARIANT=fpm \
-            --progress=plain \
-            --no-cache \
-            --push .
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.buster
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster
+            ${{ env.IMAGE_NAME }}:8.0-fpm-buster
+          no-cache: false
+          push: true
+
+  ScanAlpine80:
+    name: "Scan PHP 8.0 alpine"
+    runs-on: ubuntu-20.04
+    needs: [Alpine74]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Set env from file
+        run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
+
+      - name: Scan php8.0-fpm-alpine-amd64
+        if: ${{ env.PHP80 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.alpine
+          platforms: linux/amd64
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-amd64
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (amd64)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-amd64'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan php8.0-fpm-alpine-386
+        if: ${{ env.PHP80 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.alpine
+          platforms: linux/386
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-386
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (386)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-386'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan php8.0-fpm-alpine-arm64
+        if: ${{ env.PHP80 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.alpine
+          platforms: linux/arm64
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-arm64
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (arm64)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-arm64'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan php8.0-fpm-alpine-armv7
+        if: ${{ env.PHP80 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.alpine
+          platforms: linux/arm/v7
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-armv7
+          no-cache: false
+          push: true
+
+      - name: Run Trivy vulnerability scanner (armv7)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-armv7'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
   Alpine80:
     name: "PHP 8.0 alpine"
@@ -143,40 +697,46 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      # https://github.com/docker/setup-buildx-action
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      # https://github.com/docker/buildx/issues/495#issuecomment-761562905
-      - name: Adding custom builder
-        run: |
-          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker buildx create --name multiarch --driver docker-container --use
-          docker buildx inspect --bootstrap
-      # https://github.com/docker/login-action
+        with:
+          install: true
+
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+
       - name: Trigger docker hub build
         run: |
           curl -H "Content-Type: application/json" \
             --data '{"source_type": "Branch", "source_name": "main"}' \
             -X POST "https://hub.docker.com/api/build/v1/source/da887842-4973-4f57-a0ed-86ce3de097ed/trigger/26a41857-b0e1-40a4-85e0-b7f38719e5c2/call/";
-      # https://github.com/actions/starter-workflows/issues/68
+
       - name: Set env from file
         run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
-      - name: Build php:8.0-fpm-alpine
+
+      - name: Build php8.0-fpm-alpine
         if: ${{ env.PHP80 != '' }}
-        run: |
-          docker buildx build \
-            --file Dockerfile.alpine \
-            --platform linux/amd64,linux/386,linux/arm64,linux/arm/v7 \
-            --tag carlesbarreda/php:$PHP80-fpm-alpine \
-            --tag carlesbarreda/php:8.0-fpm-alpine \
-            --tag carlesbarreda/php:latest \
-            --build-arg VERSION=$PHP80 \
-            --build-arg VARIANT=fpm \
-            --progress=plain \
-            --no-cache \
-            --push .
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.alpine
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine
+            ${{ env.IMAGE_NAME }}:8.0-fpm-alpine
+            ${{ env.IMAGE_NAME }}:latest
+          no-cache: false
+          push: true
