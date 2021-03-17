@@ -180,7 +180,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache
           push: true
 
-  Php80:
+  Build80:
     name: "PHP 8.0 ${{ matrix.os }}"
     runs-on: ubuntu-latest
     needs: [Push74]
