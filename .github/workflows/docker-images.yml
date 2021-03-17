@@ -92,8 +92,12 @@ jobs:
           cache-name: cache-buildx
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-${{ github.sha }}
           restore-keys: |
+            ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-
+            ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-
+            ${{ runner.os }}-buildx-7.4-fpm-
+            ${{ runner.os }}-buildx-7.4-
             ${{ runner.os }}-buildx-
             ${{ runner.os }}-
 
@@ -114,8 +118,8 @@ jobs:
           # Note the mode=max here
           # More: https://github.com/moby/buildkit#--export-cache-options
           # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
-          #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
           load: true
 
       - name: Run Trivy vulnerability scanner (${{ matrix.platform }})
@@ -128,22 +132,22 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
-      #- name: Move cache
-      #  run: |
-      #    rm -rf /tmp/.buildx-cache
-      #    mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Save image
         run: |
           docker save \
-            --output /tmp/${{ env.PHP74 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar \
+            --output /tmp/7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar \
             ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.PHP74 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
-          path: /tmp/${{ env.PHP74 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar
+          name: 7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
+          path: /tmp/7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar
 
   Push74:
     name: "Push PHP 7.4 ${{ matrix.os }}"
@@ -184,8 +188,12 @@ jobs:
       #    cache-name: cache-buildx
       #  with:
       #    path: /tmp/.buildx-cache
-      #    key: ${{ runner.os }}-buildx-${{ github.sha }}
+      #    key: ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-${{ github.sha }}
       #    restore-keys: |
+      #      ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-
+      #      ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-
+      #      ${{ runner.os }}-buildx-7.4-fpm-
+      #      ${{ runner.os }}-buildx-7.4-
       #      ${{ runner.os }}-buildx-
       #      ${{ runner.os }}-
 
@@ -203,8 +211,8 @@ jobs:
       #      ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}
       #      ${{ env.IMAGE_NAME }}:7.4-fpm-${{ matrix.os }}
       #    cache-from: type=local,src=/tmp/.buildx-cache
-      #    #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-      #    cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+      #    cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+      #    #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
       #    push: true
 
       #- name: Move cache
@@ -215,33 +223,33 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
-          name: ${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64
+          name: 7.4-fpm-${{ matrix.os }}-amd64
           path: /tmp
 
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
-          name: ${{ env.PHP74 }}-fpm-${{ matrix.os }}-386
+          name: 7.4-fpm-${{ matrix.os }}-386
           path: /tmp
 
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
-          name: ${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64
+          name: 7.4-fpm-${{ matrix.os }}-arm64
           path: /tmp
 
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
-          name: ${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7
+          name: 7.4-fpm-${{ matrix.os }}-armv7
           path: /tmp
 
       - name: Load Docker image
         run: |
-          docker load --input /tmp/${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64.tar
-          docker load --input /tmp/${{ env.PHP74 }}-fpm-${{ matrix.os }}-386.tar
-          docker load --input /tmp/${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64.tar
-          docker load --input /tmp/${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7.tar
+          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-amd64.tar
+          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-386.tar
+          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-arm64.tar
+          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-armv7.tar
           docker image ls -a
 
       - name: Build the Docker image release manifest
@@ -303,8 +311,12 @@ jobs:
           cache-name: cache-buildx
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-${{ github.sha }}
           restore-keys: |
+            ${{ runner.os }}-buildx-8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-
+            ${{ runner.os }}-buildx-8.0-fpm-${{ matrix.os }}-
+            ${{ runner.os }}-buildx-8.0-fpm-
+            ${{ runner.os }}-buildx-8.0-
             ${{ runner.os }}-buildx-
             ${{ runner.os }}-
 
@@ -322,8 +334,8 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
           outputs: type=docker,dest=/tmp/${{ env.PHP80 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar
           cache-from: type=local,src=/tmp/.buildx-cache
-          #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
           load: true
 
       - name: Run Trivy vulnerability scanner (${{ matrix.platform }})
@@ -336,10 +348,10 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
-      #- name: Move cache
-      #  run: |
-      #    rm -rf /tmp/.buildx-cache
-      #    mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   Push80:
     name: "Push PHP 8.0 ${{ matrix.os }}"
@@ -380,8 +392,12 @@ jobs:
           cache-name: cache-buildx
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-${{ github.sha }}
           restore-keys: |
+            ${{ runner.os }}-buildx-8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-
+            ${{ runner.os }}-buildx-8.0-fpm-${{ matrix.os }}-
+            ${{ runner.os }}-buildx-8.0-fpm-
+            ${{ runner.os }}-buildx-8.0-
             ${{ runner.os }}-buildx-
             ${{ runner.os }}-
 
@@ -400,11 +416,11 @@ jobs:
             ${{ env.IMAGE_NAME }}:8.0-fpm-${{ matrix.os }}
             ${{ env.IMAGE_NAME }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
-          #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
           push: true
 
-      #- name: Move cache
-      #  run: |
-      #    rm -rf /tmp/.buildx-cache
-      #    mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
