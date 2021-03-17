@@ -412,13 +412,13 @@ jobs:
               --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-armv7
           docker manifest push ${{ env.IMAGE_NAME }}:8.0-fpm-${{ matrix.os }}
 
-      - name: Build and push the Docker image release manifest
+      - name: Build and push the latest Docker image release manifest
         if: ${{ env.PHP80 != '' && matrix.os == 'alpine' }} 
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
           docker manifest create \
-            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }} \
+            ${{ env.IMAGE_NAME }}:latest \
               --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-amd64 \
               --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-386 \
               --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-arm64 \
