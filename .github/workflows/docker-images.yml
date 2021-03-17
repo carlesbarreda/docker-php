@@ -36,15 +36,21 @@ jobs:
 
       - name: Lint Dockerfile
         run: |
-          docker run --rm -i -v ${PWD}/.hadolint.yml:/root/.config/hadolint.yaml hadolint/hadolint < Dockerfile
+          docker run --rm -i \
+            -v ${PWD}/.hadolint.yml:/root/.config/hadolint.yaml \
+            hadolint/hadolint < Dockerfile
 
       - name: Lint Dockerfile.alpine
         run: |
-          docker run --rm -i -v ${PWD}/.hadolint.yml:/root/.config/hadolint.yaml hadolint/hadolint < Dockerfile.alpine
+          docker run --rm -i \
+            -v ${PWD}/.hadolint.yml:/root/.config/hadolint.yaml \
+            hadolint/hadolint < Dockerfile.alpine
 
       - name: Lint Dockerfile.buster
         run: |
-          docker run --rm -i -v ${PWD}/.hadolint.yml:/root/.config/hadolint.yaml hadolint/hadolint < Dockerfile.buster
+          docker run --rm -i \
+            -v ${PWD}/.hadolint.yml:/root/.config/hadolint.yaml \
+            hadolint/hadolint < Dockerfile.buster
 
   Build74:
     name: "PHP 7.4 ${{ matrix.os }} (${{ matrix.platform }})"
