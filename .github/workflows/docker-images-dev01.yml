@@ -113,6 +113,7 @@ jobs:
             VARIANT=fpm
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
+          #outputs: type=docker,dest=/tmp/${{ env.PHP74 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar
           cache-from: type=local,src=/tmp/.buildx-cache
           # Note the mode=max here
           # More: https://github.com/moby/buildkit#--export-cache-options
@@ -179,69 +180,108 @@ jobs:
       - name: Set env from file
         run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
-        with:
-          path: /tmp
-
-      - name: Load Docker images
-        run: |
-          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-amd64.tar
-          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-386.tar
-          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-arm64.tar
-          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-armv7.tar
-
-      - name: Delete artifacts
-        uses: geekyeggo/delete-artifact@v1
-        with:
-          name: |
-            7.4-fpm-${{ matrix.os }}-amd64
-            7.4-fpm-${{ matrix.os }}-386
-            7.4-fpm-${{ matrix.os }}-arm64
-            7.4-fpm-${{ matrix.os }}-armv7
-
-      - name: Push Docker images
-        run: |
-          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64
-          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-386
-          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64
-          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7
-
-      - name: Build and push the Docker image release manifest
+      ## https://evilmartians.com/chronicles/build-images-on-github-actions-with-docker-layer-caching
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
         env:
-          DOCKER_CLI_EXPERIMENTAL: enabled
-        run: |
-          docker manifest create \
-            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }} \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-386 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7
-          docker manifest push ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}
-          docker manifest create \
-            ${{ env.IMAGE_NAME }}:7.4-fpm-${{ matrix.os }} \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-386 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7
-          docker manifest push ${{ env.IMAGE_NAME }}:7.4-fpm-${{ matrix.os }}
+          cache-name: cache-buildx
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-
+            ${{ runner.os }}-buildx-7.4-fpm-
+            ${{ runner.os }}-buildx-7.4-
+            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-
 
-      - name: Remove arch tag
+      - name: Build php7.4-fpm-${{ matrix.os }}
+        if: ${{ env.PHP74 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.${{ matrix.os }}
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}
+            ${{ env.IMAGE_NAME }}:7.4-fpm-${{ matrix.os }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          push: true
+
+      - name: Move cache
         run: |
-          LOGIN=$(echo -e "{\n  \"username\": \"${{ secrets.DOCKER_USERNAME }}\",\n  \"password\": \"${{ secrets.DOCKER_PASSWORD }}\"\n}\n")
-          TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d "$LOGIN" "https://hub.docker.com/v2/users/login/" | jq -r .token)
-          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64/" \
-            -X DELETE \
-            -H "Authorization: JWT ${TOKEN}"
-          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP74 }}-fpm-${{ matrix.os }}-386/" \
-            -X DELETE \
-            -H "Authorization: JWT ${TOKEN}"
-          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64/" \
-            -X DELETE \
-            -H "Authorization: JWT ${TOKEN}"
-          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7/" \
-            -X DELETE \
-            -H "Authorization: JWT ${TOKEN}"
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: 7.4-fpm-${{ matrix.os }}-amd64
+      #    path: /tmp
+
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: 7.4-fpm-${{ matrix.os }}-386
+      #    path: /tmp
+
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: 7.4-fpm-${{ matrix.os }}-arm64
+      #    path: /tmp
+
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: 7.4-fpm-${{ matrix.os }}-armv7
+      #    path: /tmp
+
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    path: /tmp
+
+      #- name: Load Docker image
+      #  run: |
+      #    docker load --input /tmp/7.4-fpm-${{ matrix.os }}-amd64.tar
+      #    docker load --input /tmp/7.4-fpm-${{ matrix.os }}-386.tar
+      #    docker load --input /tmp/7.4-fpm-${{ matrix.os }}-arm64.tar
+      #    docker load --input /tmp/7.4-fpm-${{ matrix.os }}-armv7.tar
+      #    docker image ls -a
+
+      #- name: Build the Docker image release manifest
+      #  env:
+      #    DOCKER_CLI_EXPERIMENTAL: enabled
+      #  run: |
+      #    docker manifest create \
+      #      ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }} \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64 \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-386 \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64 \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7
+      #    docker manifest push ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}
+      #    docker manifest create \
+      #      ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }} \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64 \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-386 \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64 \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7
+      #    docker manifest push ${{ env.IMAGE_NAME }}:7.4-fpm-${{ matrix.os }}
+
+      #- uses: geekyeggo/delete-artifact@v1
+      #  with:
+      #    name: |
+      #      7.4-fpm-${{ matrix.os }}-amd64
+      #      7.4-fpm-${{ matrix.os }}-386
+      #      7.4-fpm-${{ matrix.os }}-arm64
+      #      7.4-fpm-${{ matrix.os }}-armv7
 
   Build80:
     name: "PHP 8.0 ${{ matrix.os }} (${{ matrix.platform }})"
@@ -275,6 +315,7 @@ jobs:
             echo "SUFFIX=${{ matrix.platform }}" >> $GITHUB_ENV
           fi
 
+      # https://evilmartians.com/chronicles/build-images-on-github-actions-with-docker-layer-caching
       - name: Cache Docker layers
         uses: actions/cache@v2
         id: cache
@@ -303,8 +344,10 @@ jobs:
             VARIANT=fpm
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
+          outputs: type=docker,dest=/tmp/${{ env.PHP80 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
           load: true
 
       - name: Run Trivy vulnerability scanner (${{ matrix.platform }})
@@ -321,18 +364,6 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-      - name: Save image
-        run: |
-          docker save \
-            --output /tmp/8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar \
-            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: 8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
-          path: /tmp/8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar
 
   Push80:
     name: "Push PHP 8.0 ${{ matrix.os }}"
@@ -365,79 +396,43 @@ jobs:
       - name: Set env from file
         run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
-        with:
-          path: /tmp
-
-      - name: Load Docker images
-        run: |
-          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-amd64.tar
-          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-386.tar
-          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-arm64.tar
-          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-armv7.tar
-
-      - name: Delete artifacts
-        uses: geekyeggo/delete-artifact@v1
-        with:
-          name: |
-            8.0-fpm-${{ matrix.os }}-amd64
-            8.0-fpm-${{ matrix.os }}-386
-            8.0-fpm-${{ matrix.os }}-arm64
-            8.0-fpm-${{ matrix.os }}-armv7
-
-      - name: Push Docker images
-        run: |
-          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-amd64
-          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-386
-          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-arm64
-          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-armv7
-
-      - name: Build and push the Docker image release manifest
+      # https://evilmartians.com/chronicles/build-images-on-github-actions-with-docker-layer-caching
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
         env:
-          DOCKER_CLI_EXPERIMENTAL: enabled
-        run: |
-          docker manifest create \
-            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }} \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-amd64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-386 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-arm64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-armv7
-          docker manifest push ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}
-          docker manifest create \
-            ${{ env.IMAGE_NAME }}:8.0-fpm-${{ matrix.os }} \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-amd64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-386 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-arm64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-armv7
-          docker manifest push ${{ env.IMAGE_NAME }}:8.0-fpm-${{ matrix.os }}
+          cache-name: cache-buildx
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-
+            ${{ runner.os }}-buildx-8.0-fpm-${{ matrix.os }}-
+            ${{ runner.os }}-buildx-8.0-fpm-
+            ${{ runner.os }}-buildx-8.0-
+            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-
 
-      - name: Build and push the Docker image release manifest
-        if: ${{ env.PHP80 != '' && matrix.os == 'alpine' }} 
-        env:
-          DOCKER_CLI_EXPERIMENTAL: enabled
-        run: |
-          docker manifest create \
-            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }} \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-amd64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-386 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-arm64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-armv7
-          docker manifest push ${{ env.IMAGE_NAME }}:latest
+      - name: Build php8.0-fpm-${{ matrix.os }}
+        if: ${{ env.PHP80 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.${{ matrix.os }}
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}
+            ${{ env.IMAGE_NAME }}:8.0-fpm-${{ matrix.os }}
+            ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          push: true
 
-      - name: Remove arch tag
+      - name: Move cache
         run: |
-          LOGIN=$(echo -e "{\n  \"username\": \"${{ secrets.DOCKER_USERNAME }}\",\n  \"password\": \"${{ secrets.DOCKER_PASSWORD }}\"\n}\n")
-          TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d "$LOGIN" "https://hub.docker.com/v2/users/login/" | jq -r .token)
-          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP80 }}-fpm-${{ matrix.os }}-amd64/" \
-            -X DELETE \
-            -H "Authorization: JWT ${TOKEN}"
-          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP80 }}-fpm-${{ matrix.os }}-386/" \
-            -X DELETE \
-            -H "Authorization: JWT ${TOKEN}"
-          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP80 }}-fpm-${{ matrix.os }}-arm64/" \
-            -X DELETE \
-            -H "Authorization: JWT ${TOKEN}"
-          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP80 }}-fpm-${{ matrix.os }}-armv7/" \
-            -X DELETE \
-            -H "Authorization: JWT ${TOKEN}"
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
