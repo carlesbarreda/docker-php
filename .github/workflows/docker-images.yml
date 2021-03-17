@@ -181,95 +181,108 @@ jobs:
         run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
 
       ## https://evilmartians.com/chronicles/build-images-on-github-actions-with-docker-layer-caching
-      #- name: Cache Docker layers
-      #  uses: actions/cache@v2
-      #  id: cache
-      #  env:
-      #    cache-name: cache-buildx
-      #  with:
-      #    path: /tmp/.buildx-cache
-      #    key: ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-${{ github.sha }}
-      #    restore-keys: |
-      #      ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-
-      #      ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-
-      #      ${{ runner.os }}-buildx-7.4-fpm-
-      #      ${{ runner.os }}-buildx-7.4-
-      #      ${{ runner.os }}-buildx-
-      #      ${{ runner.os }}-
-
-      #- name: Build php7.4-fpm-${{ matrix.os }}
-      #  if: ${{ env.PHP74 != '' }}
-      #  uses: docker/build-push-action@v2
-      #  with:
-      #    context: .
-      #    file: ./Dockerfile.${{ matrix.os }}
-      #    platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
-      #    build-args: |
-      #      VERSION=${{ env.PHP74 }}
-      #      VARIANT=fpm
-      #    tags: |
-      #      ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}
-      #      ${{ env.IMAGE_NAME }}:7.4-fpm-${{ matrix.os }}
-      #    cache-from: type=local,src=/tmp/.buildx-cache
-      #    cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-      #    #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
-      #    push: true
-
-      #- name: Move cache
-      #  run: |
-      #    rm -rf /tmp/.buildx-cache
-      #    mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: 7.4-fpm-${{ matrix.os }}-amd64
-          path: /tmp
-
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: 7.4-fpm-${{ matrix.os }}-386
-          path: /tmp
-
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: 7.4-fpm-${{ matrix.os }}-arm64
-          path: /tmp
-
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: 7.4-fpm-${{ matrix.os }}-armv7
-          path: /tmp
-
-      - name: Load Docker image
-        run: |
-          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-amd64.tar
-          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-386.tar
-          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-arm64.tar
-          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-armv7.tar
-          docker image ls -a
-
-      - name: Build the Docker image release manifest
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
         env:
-          DOCKER_CLI_EXPERIMENTAL: enabled
+          cache-name: cache-buildx
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-
+            ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-
+            ${{ runner.os }}-buildx-7.4-fpm-
+            ${{ runner.os }}-buildx-7.4-
+            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-
+
+      - name: Build php7.4-fpm-${{ matrix.os }}
+        if: ${{ env.PHP74 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.${{ matrix.os }}
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}
+            ${{ env.IMAGE_NAME }}:7.4-fpm-${{ matrix.os }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          push: true
+
+      - name: Move cache
         run: |
-          docker manifest create \
-            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }} \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-386 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7
-          docker manifest push ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}
-          docker manifest create \
-            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }} \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-386 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64 \
-              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7
-          docker manifest push ${{ env.IMAGE_NAME }}:7.4-fpm-${{ matrix.os }}
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: 7.4-fpm-${{ matrix.os }}-amd64
+      #    path: /tmp
+
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: 7.4-fpm-${{ matrix.os }}-386
+      #    path: /tmp
+
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: 7.4-fpm-${{ matrix.os }}-arm64
+      #    path: /tmp
+
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: 7.4-fpm-${{ matrix.os }}-armv7
+      #    path: /tmp
+
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    path: /tmp
+
+      #- name: Load Docker image
+      #  run: |
+      #    docker load --input /tmp/7.4-fpm-${{ matrix.os }}-amd64.tar
+      #    docker load --input /tmp/7.4-fpm-${{ matrix.os }}-386.tar
+      #    docker load --input /tmp/7.4-fpm-${{ matrix.os }}-arm64.tar
+      #    docker load --input /tmp/7.4-fpm-${{ matrix.os }}-armv7.tar
+      #    docker image ls -a
+
+      #- name: Build the Docker image release manifest
+      #  env:
+      #    DOCKER_CLI_EXPERIMENTAL: enabled
+      #  run: |
+      #    docker manifest create \
+      #      ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }} \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64 \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-386 \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64 \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7
+      #    docker manifest push ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}
+      #    docker manifest create \
+      #      ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }} \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64 \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-386 \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64 \
+      #        --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7
+      #    docker manifest push ${{ env.IMAGE_NAME }}:7.4-fpm-${{ matrix.os }}
+
+      #- uses: geekyeggo/delete-artifact@v1
+      #  with:
+      #    name: |
+      #      7.4-fpm-${{ matrix.os }}-amd64
+      #      7.4-fpm-${{ matrix.os }}-386
+      #      7.4-fpm-${{ matrix.os }}-arm64
+      #      7.4-fpm-${{ matrix.os }}-armv7
 
   Build80:
     name: "PHP 8.0 ${{ matrix.os }} (${{ matrix.platform }})"
