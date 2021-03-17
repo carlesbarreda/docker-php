@@ -186,10 +186,10 @@ jobs:
 
       - name: Load Docker images
         run: |
-          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-amd64.tar
-          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-386.tar
-          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-arm64.tar
-          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-armv7.tar
+          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-amd64/7.4-fpm-${{ matrix.os }}-amd64.tar
+          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-386/7.4-fpm-${{ matrix.os }}-386.tar
+          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-arm64/7.4-fpm-${{ matrix.os }}-arm64.tar
+          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-armv7/7.4-fpm-${{ matrix.os }}-armv7.tar
 
       - name: Delete artifacts
         uses: geekyeggo/delete-artifact@v1
@@ -372,10 +372,10 @@ jobs:
 
       - name: Load Docker images
         run: |
-          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-amd64.tar
-          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-386.tar
-          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-arm64.tar
-          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-armv7.tar
+          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-amd64/8.0-fpm-${{ matrix.os }}-amd64.tar
+          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-386/8.0-fpm-${{ matrix.os }}-386.tar
+          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-arm64/8.0-fpm-${{ matrix.os }}-arm64.tar
+          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-armv7/8.0-fpm-${{ matrix.os }}-armv7.tar
 
       - name: Delete artifacts
         uses: geekyeggo/delete-artifact@v1
