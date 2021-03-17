@@ -46,8 +46,8 @@ jobs:
         run: |
           docker run --rm -i -v ${PWD}/.hadolint.yml:/root/.config/hadolint.yaml hadolint/hadolint < Dockerfile.buster
 
-  ScanBuster74:
-    name: "Scan PHP 7.4 buster"
+  Buster74:
+    name: "PHP 7.4 buster"
     runs-on: ubuntu-latest
     needs: [lint]
     strategy:
@@ -117,46 +117,6 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
-  Buster74:
-    name: "PHP 7.4 buster"
-    runs-on: ubuntu-latest
-    needs: [ScanBuster74]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-        with:
-          image: tonistiigi/binfmt:latest
-          platforms: all
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        with:
-          install: true
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Set env from file
-        run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
-
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        id: cache
-        env:
-          cache-name: cache-buildx
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-            ${{ runner.os }}-
-
       - name: Build php7.4-fpm-buster
         if: ${{ env.PHP74 != '' }}
         uses: docker/build-push-action@v2
@@ -175,149 +135,13 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache
           push: true
 
-  ScanAlpine74:
-    name: "Scan PHP 7.4 alpine"
-    runs-on: ubuntu-latest
-    needs: [lint]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-        with:
-          image: tonistiigi/binfmt:latest
-          platforms: all
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        with:
-          install: true
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Set env from file
-        run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
-
-      - name: Scan php7.4-fpm-alpine-amd64
-        if: ${{ env.PHP74 != '' }}
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile.alpine
-          platforms: linux/amd64
-          build-args: |
-            VERSION=${{ env.PHP74 }}
-            VARIANT=fpm
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-amd64
-          no-cache: false
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          load: true
-
-      - name: Run Trivy vulnerability scanner (amd64)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-amd64'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Scan php7.4-fpm-alpine-386
-        if: ${{ env.PHP74 != '' }}
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile.alpine
-          platforms: linux/386
-          build-args: |
-            VERSION=${{ env.PHP74 }}
-            VARIANT=fpm
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-386
-          no-cache: false
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          load: true
-
-      - name: Run Trivy vulnerability scanner (386)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-386'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Scan php7.4-fpm-alpine-arm64
-        if: ${{ env.PHP74 != '' }}
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile.alpine
-          platforms: linux/arm64
-          build-args: |
-            VERSION=${{ env.PHP74 }}
-            VARIANT=fpm
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-arm64
-          no-cache: false
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          load: true
-
-      - name: Run Trivy vulnerability scanner (arm64)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-arm64'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Scan php7.4-fpm-alpine-armv7
-        if: ${{ env.PHP74 != '' }}
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile.alpine
-          platforms: linux/arm/v7
-          build-args: |
-            VERSION=${{ env.PHP74 }}
-            VARIANT=fpm
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-armv7
-          no-cache: false
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          load: true
-
-      - name: Run Trivy vulnerability scanner (armv7)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-armv7'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Archive BuildX cache
-        uses: actions/upload-artifact@v2
-        with:
-          name: buildx-cache-alpine74
-          path: |
-            /tmp/.buildx-cache
-
   Alpine74:
     name: "PHP 7.4 alpine"
     runs-on: ubuntu-latest
-    needs: [ScanAlpine74]
+    needs: [lint]
+    strategy:
+      matrix:
+        platform: [amd64,386,arm64,arm/v7]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -333,19 +157,53 @@ jobs:
         with:
           install: true
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Set env vars
+        run: |
+          grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
+          if [ ${{ matrix.platform }} = arm/v7 ]; then 
+            echo "SUFFIX=armv7" >> $GITHUB_ENV
+          else
+            echo "SUFFIX=${{ matrix.platform }}" >> $GITHUB_ENV
+          fi
 
-      - name: Set env from file
-        run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
-
-      - name: Download buildx cache
-        uses: actions/download-artifact@v2
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
+        env:
+          cache-name: cache-buildx
         with:
-          name: buildx-cache-alpine74
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-
+
+      - name: Scan php7.4-fpm-alpine-${{ matrix.platform }}
+        if: ${{ env.PHP74 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.alpine
+          platforms: linux/${{ matrix.platform }}
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-${{ env.SUFFIX }}
+          no-cache: false
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          load: true
+
+      - name: Run Trivy vulnerability scanner (${{ matrix.platform }})
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-alpine-${{ env.SUFFIX }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
       - name: Build php7.4-fpm-alpine
         if: ${{ env.PHP74 != '' }}
@@ -362,151 +220,16 @@ jobs:
             ${{ env.IMAGE_NAME }}:7.4-fpm-alpine
           no-cache: false
           cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
           push: true
-
-  ScanBuster80:
-    name: "Scan PHP 8.0 buster"
-    runs-on: ubuntu-latest
-    needs: [lint]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-        with:
-          image: tonistiigi/binfmt:latest
-          platforms: all
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        with:
-          install: true
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Set env from file
-        run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
-
-      - name: Scan php8.0-fpm-buster-amd64
-        if: ${{ env.PHP80 != '' }}
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile.buster
-          platforms: linux/amd64
-          build-args: |
-            VERSION=${{ env.PHP80 }}
-            VARIANT=fpm
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-amd64
-          no-cache: false
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          load: true
-
-      - name: Run Trivy vulnerability scanner (amd64)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-amd64'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Scan php8.0-fpm-buster-386
-        if: ${{ env.PHP80 != '' }}
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile.buster
-          platforms: linux/386
-          build-args: |
-            VERSION=${{ env.PHP80 }}
-            VARIANT=fpm
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-386
-          no-cache: false
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          load: true
-
-      - name: Run Trivy vulnerability scanner (386)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-386'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Scan php8.0-fpm-buster-arm64
-        if: ${{ env.PHP80 != '' }}
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile.buster
-          platforms: linux/arm64
-          build-args: |
-            VERSION=${{ env.PHP80 }}
-            VARIANT=fpm
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-arm64
-          no-cache: false
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          load: true
-
-      - name: Run Trivy vulnerability scanner (arm64)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-arm64'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Scan php8.0-fpm-buster-armv7
-        if: ${{ env.PHP80 != '' }}
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile.buster
-          platforms: linux/arm/v7
-          build-args: |
-            VERSION=${{ env.PHP80 }}
-            VARIANT=fpm
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-armv7
-          no-cache: false
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          load: true
-
-      - name: Run Trivy vulnerability scanner (armv7)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-armv7'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Archive BuildX cache
-        uses: actions/upload-artifact@v2
-        with:
-          name: buildx-cache-buster80
-          path: |
-            /tmp/.buildx-cache
 
   Buster80:
     name: "PHP 8.0 buster"
-    needs: [ScanBuster80]
     runs-on: ubuntu-latest
+    needs: [Buster74]
+    strategy:
+      matrix:
+        platform: [amd64,386,arm64,arm/v7]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -522,19 +245,53 @@ jobs:
         with:
           install: true
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Set env vars
+        run: |
+          grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
+          if [ ${{ matrix.platform }} = arm/v7 ]; then 
+            echo "SUFFIX=armv7" >> $GITHUB_ENV
+          else
+            echo "SUFFIX=${{ matrix.platform }}" >> $GITHUB_ENV
+          fi
 
-      - name: Set env from file
-        run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
-
-      - name: Download buildx cache
-        uses: actions/download-artifact@v2
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
+        env:
+          cache-name: cache-buildx
         with:
-          name: buildx-cache-buster80
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-
+
+      - name: Scan php8.0-fpm-buster-${{ matrix.platform }}
+        if: ${{ env.PHP80 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.buster
+          platforms: linux/${{ matrix.platform }}
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-${{ env.SUFFIX }}
+          no-cache: false
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          load: true
+
+      - name: Run Trivy vulnerability scanner (${{ matrix.platform }})
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-buster-${{ env.SUFFIX }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
       - name: Build php8.0-fpm-buster
         if: ${{ env.PHP80 != '' }}
@@ -551,151 +308,16 @@ jobs:
             ${{ env.IMAGE_NAME }}:8.0-fpm-buster
           no-cache: false
           cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
           push: true
-
-  ScanAlpine80:
-    name: "Scan PHP 8.0 alpine"
-    runs-on: ubuntu-latest
-    needs: [lint]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-        with:
-          image: tonistiigi/binfmt:latest
-          platforms: all
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        with:
-          install: true
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Set env from file
-        run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
-
-      - name: Scan php8.0-fpm-alpine-amd64
-        if: ${{ env.PHP80 != '' }}
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile.alpine
-          platforms: linux/amd64
-          build-args: |
-            VERSION=${{ env.PHP80 }}
-            VARIANT=fpm
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-amd64
-          no-cache: false
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          load: true
-
-      - name: Run Trivy vulnerability scanner (amd64)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-amd64'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Scan php8.0-fpm-alpine-386
-        if: ${{ env.PHP80 != '' }}
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile.alpine
-          platforms: linux/386
-          build-args: |
-            VERSION=${{ env.PHP80 }}
-            VARIANT=fpm
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-386
-          no-cache: false
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          load: true
-
-      - name: Run Trivy vulnerability scanner (386)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-386'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Scan php8.0-fpm-alpine-arm64
-        if: ${{ env.PHP80 != '' }}
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile.alpine
-          platforms: linux/arm64
-          build-args: |
-            VERSION=${{ env.PHP80 }}
-            VARIANT=fpm
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-arm64
-          no-cache: false
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          load: true
-
-      - name: Run Trivy vulnerability scanner (arm64)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-arm64'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Scan php8.0-fpm-alpine-armv7
-        if: ${{ env.PHP80 != '' }}
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile.alpine
-          platforms: linux/arm/v7
-          build-args: |
-            VERSION=${{ env.PHP80 }}
-            VARIANT=fpm
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-armv7
-          no-cache: false
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          load: true
-
-      - name: Run Trivy vulnerability scanner (armv7)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-armv7'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Archive BuildX cache
-        uses: actions/upload-artifact@v2
-        with:
-          name: buildx-cache-alpine80
-          path: |
-            /tmp/.buildx-cache
 
   Alpine80:
     name: "PHP 8.0 alpine"
-    needs: [ScanAlpine80]
     runs-on: ubuntu-latest
+    needs: [Alpine74]
+    strategy:
+      matrix:
+        platform: [amd64,386,arm64,arm/v7]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -711,25 +333,53 @@ jobs:
         with:
           install: true
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Trigger docker hub build
+      - name: Set env vars
         run: |
-          curl -H "Content-Type: application/json" \
-            --data '{"source_type": "Branch", "source_name": "main"}' \
-            -X POST "https://hub.docker.com/api/build/v1/source/da887842-4973-4f57-a0ed-86ce3de097ed/trigger/26a41857-b0e1-40a4-85e0-b7f38719e5c2/call/";
+          grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
+          if [ ${{ matrix.platform }} = arm/v7 ]; then 
+            echo "SUFFIX=armv7" >> $GITHUB_ENV
+          else
+            echo "SUFFIX=${{ matrix.platform }}" >> $GITHUB_ENV
+          fi
 
-      - name: Set env from file
-        run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
-
-      - name: Download buildx cache
-        uses: actions/download-artifact@v2
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
+        env:
+          cache-name: cache-buildx
         with:
-          name: buildx-cache-alpine80
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-
+
+      - name: Scan php8.0-fpm-alpine-${{ matrix.platform }}
+        if: ${{ env.PHP80 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.alpine
+          platforms: linux/${{ matrix.platform }}
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-${{ env.SUFFIX }}
+          no-cache: false
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          load: true
+
+      - name: Run Trivy vulnerability scanner (${{ matrix.platform }})
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-alpine-${{ env.SUFFIX }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
       - name: Build php8.0-fpm-alpine
         if: ${{ env.PHP80 != '' }}
@@ -747,4 +397,5 @@ jobs:
             ${{ env.IMAGE_NAME }}:latest
           no-cache: false
           cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
           push: true
