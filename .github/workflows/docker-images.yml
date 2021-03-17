@@ -137,7 +137,7 @@ jobs:
         run: |
           docker save \
             --output /tmp/${{ env.PHP74 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar \
-            ${{ env.PHP74 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
