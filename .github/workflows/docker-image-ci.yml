@@ -127,7 +127,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./Dockerfile
+          file: ./Dockerfile.${{ matrix.os }}
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
           tags: ${{ steps.meta-image.outputs.tags }}
           labels: ${{ steps.meta-image.outputs.labels }}
