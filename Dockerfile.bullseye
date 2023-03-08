@@ -54,7 +54,8 @@ RUN set -ex; \
 	docker-php-ext-configure imap --with-imap --with-imap-ssl --with-kerberos; \
 	docker-php-ext-install -j$(nproc) \
 		bz2 bcmath calendar exif gd gettext imap intl ldap mysqli pcntl pdo_mysql pdo_pgsql \
-		shmop sockets sysvmsg sysvsem sysvshm xsl zip readline; \
+		shmop sockets sysvmsg sysvsem sysvshm xsl zip; \
+        #readline
 	docker-php-ext-enable opcache; \
 	# imagick
 # use github version for now until release from https://pecl.php.net/get/imagick is ready for PHP 8
@@ -69,8 +70,8 @@ RUN set -ex; \
 	pecl install imagick; \
 	pecl install igbinary; \
 	pecl install msgpack; \
-	pecl install xdebug; \
-	docker-php-ext-enable apcu imagick igbinary msgpack xdebug; \
+	#pecl install xdebug; \ xdebug
+	docker-php-ext-enable apcu imagick igbinary msgpack; \
 	# redis memcached
 	echo 'yes\nyes\nyes' | pecl install redis; \
 	echo 'no\nno\nno\nyes\nno\nyes\nno\nyes\nyes' | pecl install memcached; \
