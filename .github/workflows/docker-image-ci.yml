@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [alpine3.17,bullseye]
+        os: [bullseye,alpine]
         #os: [alpine,alpine3.16,alpine3.17,buster,bullseye]
         #platform: [amd64,arm64/v8,arm/v7]
     steps:
@@ -110,28 +110,13 @@ jobs:
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         id: meta-image
-        if: matrix.os == 'alpine3.17'
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             ${{ env.RELEASE }}-fpm-${{ matrix.os }}
-            ${{ env.RELEASE }}-fpm-alpine
             ${{ env.RELEASE }}
             latest
-          labels: |
-            org.opencontainers.image.authors=${{ env.AUTHORS }}
-            org.opencontainers.image.vendor=${{ env.VENDOR }}
-            org.opencontainers.image.version=${{ env.RELEASE }}
-
-      - name: Extract Docker metadata
-        id: meta-image
-        if: matrix.os != 'alpine3.17'
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            ${{ env.RELEASE }}-fpm-${{ matrix.os }}
           labels: |
             org.opencontainers.image.authors=${{ env.AUTHORS }}
             org.opencontainers.image.vendor=${{ env.VENDOR }}
