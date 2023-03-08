@@ -1,36 +1,46 @@
 # syntax=docker/dockerfile:1.2
-FROM --platform=$TARGETPLATFORM php:$VERSION-fpm-$BASEIMAGE
-
-ARG TARGETPLATFORM
 ARG VERSION
 ARG BASEIMAGE
+FROM php:$VERSION-fpm-$BASEIMAGE
+
+ARG TARGETPLATFORM
+
+#docker buildx build --platform linux/amd64,linux/arm64/v8,linux/arm/v7 --build-arg VERSION=8.2.3 --build-arg BASEIMAGE=bullseye -t carlesbarreda/php:8.2.3-fpm-bullseye --push -f Dockerfile.alpine .
 
 ENV DEBIAN_FRONTEND noninteractive
 
-# Persistent dependencies
+ # Persistent dependencies
 RUN set -eux; \
     \
-    # https://serverfault.com/questions/633394/php-configure-not-finding-ldap-header-libraries
+    ## https://serverfault.com/questions/633394/php-configure-not-finding-ldap-header-libraries
     #if [ ${TARGETPLATFORM} = linux/386 ]; then \
     #    ln -s /usr/lib/i386-linux-gnu/libldap.so /usr/lib/libldap.so; \
     #    ln -s /usr/lib/i386-linux-gnu/liblber.so /usr/lib/liblber.so; \
     #fi; \
-    # https://github.com/docker/buildx/issues/495#issuecomment-772267281
-    #if [ ${TARGETPLATFORM} = linux/arm64 ]; then \
+    ## https://github.com/docker/buildx/issues/495#issuecomment-772267281
+    #if [ ${TARGETPLATFORM} = linux/arm64 || ${TARGETPLATFORM} = linux/arm/v7 ]; then \
     #    ln -s /usr/bin/dpkg-split /usr/sbin; \
     #    ln -s /usr/bin/dpkg-deb /usr/sbin; \
     #    ln -s /bin/tar /usr/sbin; \
     #    ln -s /bin/rm /usr/sbin; \
     #fi; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
 # Ghostscript is required for rendering PDF previews
-		ghostscript \
-	; \
-	rm -rf /var/lib/apt/lists/*
+        ghostscript \
+    ; \
+    rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
 RUN set -ex; \
+    \
+    ## https://github.com/docker/buildx/issues/495#issuecomment-772267281
+    #if [ ${TARGETPLATFORM} = linux/arm64 || ${TARGETPLATFORM} = linux/arm/v7 ]; then \
+    #    ln -s /usr/bin/dpkg-split /usr/sbin; \
+    #    ln -s /usr/bin/dpkg-deb /usr/sbin; \
+    #    ln -s /bin/tar /usr/sbin; \
+    #    ln -s /bin/rm /usr/sbin; \
+    #fi; \
     \
     savedAptMark="$(apt-mark showmanual)"; \
     \
@@ -50,16 +60,17 @@ RUN set -ex; \
 # use github version for now until release from https://pecl.php.net/get/imagick is ready for PHP 8
 # https://github.com/Imagick/imagick/issues/331#issuecomment-779190777
 # https://github.com/Imagick/imagick/issues/331#issuecomment-785284870
-	mkdir -p /usr/src/php/ext/imagick; \
-	curl -fsSL https://github.com/Imagick/imagick/archive/06116aa24b76edaf6b1693198f79e6c295eda8a9.tar.gz | tar xvz -C "/usr/src/php/ext/imagick" --strip 1; \
-	docker-php-ext-install -j$(nproc) imagick; \
-	rm -rf /usr/src/php/ext/imagick; \
+	#mkdir -p /usr/src/php/ext/imagick; \
+	#curl -fsSL https://github.com/Imagick/imagick/archive/06116aa24b76edaf6b1693198f79e6c295eda8a9.tar.gz | tar xvz -C "/usr/src/php/ext/imagick" --strip 1; \
+	#docker-php-ext-install -j$(nproc) imagick; \
+	#rm -rf /usr/src/php/ext/imagick; \
 	# apcu igbinary msgpack xdebug
 	echo 'no' | pecl install apcu; \
+	pecl install imagick; \
 	pecl install igbinary; \
 	pecl install msgpack; \
 	pecl install xdebug; \
-	docker-php-ext-enable apcu igbinary msgpack xdebug; \
+	docker-php-ext-enable apcu imagick igbinary msgpack xdebug; \
 	# redis memcached
 	echo 'yes\nyes\nyes' | pecl install redis; \
 	echo 'no\nno\nno\nyes\nno\nyes\nno\nyes\nyes' | pecl install memcached; \

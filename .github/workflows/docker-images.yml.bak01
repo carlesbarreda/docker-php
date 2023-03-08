@@ -1,0 +1,421 @@
+name: PHP 7.4 / 8.0 image sets CI
+
+on:
+
+#  push:
+#    branches: main
+
+#  workflow_dispatch:
+#    inputs:
+#      tags:
+#        description: 'Cerbot version tag'
+#        required: true
+#        default: 'v1.10.1'
+#      latest:
+#        description: 'Is latest?'
+#        required: true
+#        default: 'yes'
+
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: carlesbarreda/php
+
+jobs:
+  lint:
+    name: Lint Dockerfile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      #- name: Lint Dockerfile
+      #  uses: brpaz/hadolint-action@v1.2.1
+      #  with:
+      #    dockerfile: Dockerfile
+
+      - name: Lint Dockerfile
+        run: |
+          docker run --rm -i \
+            -v ${PWD}/.hadolint.yml:/root/.config/hadolint.yaml \
+            hadolint/hadolint < Dockerfile
+
+      - name: Lint Dockerfile.alpine
+        run: |
+          docker run --rm -i \
+            -v ${PWD}/.hadolint.yml:/root/.config/hadolint.yaml \
+            hadolint/hadolint < Dockerfile.alpine
+
+      - name: Lint Dockerfile.buster
+        run: |
+          docker run --rm -i \
+            -v ${PWD}/.hadolint.yml:/root/.config/hadolint.yaml \
+            hadolint/hadolint < Dockerfile.buster
+
+  Build74:
+    name: "PHP 7.4 ${{ matrix.os }} (${{ matrix.platform }})"
+    runs-on: ubuntu-latest
+    needs: [lint]
+    strategy:
+      matrix:
+        os: [buster,alpine]
+        platform: [amd64,386,arm64,arm/v7]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+
+      - name: Set env vars
+        run: |
+          grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
+          if [ ${{ matrix.platform }} = arm/v7 ]; then 
+            echo "SUFFIX=armv7" >> $GITHUB_ENV
+          else
+            echo "SUFFIX=${{ matrix.platform }}" >> $GITHUB_ENV
+          fi
+
+      # https://evilmartians.com/chronicles/build-images-on-github-actions-with-docker-layer-caching
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
+        env:
+          cache-name: cache-buildx
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-
+            ${{ runner.os }}-buildx-7.4-fpm-${{ matrix.os }}-
+            ${{ runner.os }}-buildx-7.4-fpm-
+            ${{ runner.os }}-buildx-7.4-
+            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-
+
+      - name: Scan php7.4-fpm-${{ matrix.os }}-${{ matrix.platform }}
+        if: ${{ env.PHP74 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.${{ matrix.os }}
+          platforms: linux/${{ matrix.platform }}
+          build-args: |
+            VERSION=${{ env.PHP74 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          # Note the mode=max here
+          # More: https://github.com/moby/buildkit#--export-cache-options
+          # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          #cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
+          load: true
+
+      - name: Run Trivy vulnerability scanner (${{ matrix.platform }})
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Save image
+        run: |
+          docker save \
+            --output /tmp/7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar \
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: 7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
+          path: /tmp/7.4-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar
+
+  Push74:
+    name: "Push PHP 7.4 ${{ matrix.os }}"
+    runs-on: ubuntu-latest
+    needs: [Build74]
+    strategy:
+      matrix:
+        os: [buster,alpine]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Set env from file
+        run: grep -e ^PHP74.*= .env.build >> $GITHUB_ENV
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: /tmp
+
+      - name: Load Docker images
+        run: |
+          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-amd64/7.4-fpm-${{ matrix.os }}-amd64.tar
+          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-386/7.4-fpm-${{ matrix.os }}-386.tar
+          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-arm64/7.4-fpm-${{ matrix.os }}-arm64.tar
+          docker load --input /tmp/7.4-fpm-${{ matrix.os }}-armv7/7.4-fpm-${{ matrix.os }}-armv7.tar
+
+      - name: Delete artifacts
+        uses: geekyeggo/delete-artifact@v1
+        with:
+          name: |
+            7.4-fpm-${{ matrix.os }}-amd64
+            7.4-fpm-${{ matrix.os }}-386
+            7.4-fpm-${{ matrix.os }}-arm64
+            7.4-fpm-${{ matrix.os }}-armv7
+
+      - name: Push Docker images
+        run: |
+          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64
+          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-386
+          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64
+          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7
+
+      - name: Build and push the Docker image release manifest
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
+        run: |
+          docker manifest create \
+            ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }} \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-386 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7
+          docker manifest push ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}
+          docker manifest create \
+            ${{ env.IMAGE_NAME }}:7.4-fpm-${{ matrix.os }} \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-386 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7
+          docker manifest push ${{ env.IMAGE_NAME }}:7.4-fpm-${{ matrix.os }}
+
+      - name: Remove arch tag
+        run: |
+          LOGIN=$(echo -e "{\n  \"username\": \"${{ secrets.DOCKER_USERNAME }}\",\n  \"password\": \"${{ secrets.DOCKER_PASSWORD }}\"\n}\n")
+          TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d "$LOGIN" "https://hub.docker.com/v2/users/login/" | jq -r .token)
+          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP74 }}-fpm-${{ matrix.os }}-amd64/" \
+            -X DELETE \
+            -H "Authorization: JWT ${TOKEN}"
+          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP74 }}-fpm-${{ matrix.os }}-386/" \
+            -X DELETE \
+            -H "Authorization: JWT ${TOKEN}"
+          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP74 }}-fpm-${{ matrix.os }}-arm64/" \
+            -X DELETE \
+            -H "Authorization: JWT ${TOKEN}"
+          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP74 }}-fpm-${{ matrix.os }}-armv7/" \
+            -X DELETE \
+            -H "Authorization: JWT ${TOKEN}"
+
+  Build80:
+    name: "PHP 8.0 ${{ matrix.os }} (${{ matrix.platform }})"
+    runs-on: ubuntu-latest
+    needs: [Push74]
+    strategy:
+      matrix:
+        os: [buster,alpine]
+        platform: [amd64,386,arm64,arm/v7]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+
+      - name: Set env vars
+        run: |
+          grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
+          if [ ${{ matrix.platform }} = arm/v7 ]; then 
+            echo "SUFFIX=armv7" >> $GITHUB_ENV
+          else
+            echo "SUFFIX=${{ matrix.platform }}" >> $GITHUB_ENV
+          fi
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        id: cache
+        env:
+          cache-name: cache-buildx
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}-
+            ${{ runner.os }}-buildx-8.0-fpm-${{ matrix.os }}-
+            ${{ runner.os }}-buildx-8.0-fpm-
+            ${{ runner.os }}-buildx-8.0-
+            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-
+
+      - name: Scan php8.0-fpm-${{ matrix.os }}-${{ matrix.platform }}
+        if: ${{ env.PHP80 != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile.${{ matrix.os }}
+          platforms: linux/${{ matrix.platform }}
+          build-args: |
+            VERSION=${{ env.PHP80 }}
+            VARIANT=fpm
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          load: true
+
+      - name: Run Trivy vulnerability scanner (${{ matrix.platform }})
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Save image
+        run: |
+          docker save \
+            --output /tmp/8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar \
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: 8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}
+          path: /tmp/8.0-fpm-${{ matrix.os }}-${{ env.SUFFIX }}.tar
+
+  Push80:
+    name: "Push PHP 8.0 ${{ matrix.os }}"
+    runs-on: ubuntu-latest
+    needs: [Build80]
+    strategy:
+      matrix:
+        os: [buster,alpine]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Set env from file
+        run: grep -e ^PHP80.*= .env.build >> $GITHUB_ENV
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: /tmp
+
+      - name: Load Docker images
+        run: |
+          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-amd64/8.0-fpm-${{ matrix.os }}-amd64.tar
+          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-386/8.0-fpm-${{ matrix.os }}-386.tar
+          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-arm64/8.0-fpm-${{ matrix.os }}-arm64.tar
+          docker load --input /tmp/8.0-fpm-${{ matrix.os }}-armv7/8.0-fpm-${{ matrix.os }}-armv7.tar
+
+      - name: Delete artifacts
+        uses: geekyeggo/delete-artifact@v1
+        with:
+          name: |
+            8.0-fpm-${{ matrix.os }}-amd64
+            8.0-fpm-${{ matrix.os }}-386
+            8.0-fpm-${{ matrix.os }}-arm64
+            8.0-fpm-${{ matrix.os }}-armv7
+
+      - name: Push Docker images
+        run: |
+          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-amd64
+          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-386
+          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-arm64
+          docker push ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-armv7
+
+      - name: Build and push the Docker image release manifest
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
+        run: |
+          docker manifest create \
+            ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }} \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-amd64 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-386 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-arm64 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-armv7
+          docker manifest push ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}
+          docker manifest create \
+            ${{ env.IMAGE_NAME }}:8.0-fpm-${{ matrix.os }} \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-amd64 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-386 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-arm64 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-armv7
+          docker manifest push ${{ env.IMAGE_NAME }}:8.0-fpm-${{ matrix.os }}
+
+      - name: Build and push the latest Docker image release manifest
+        if: ${{ env.PHP80 != '' && matrix.os == 'alpine' }} 
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
+        run: |
+          docker manifest create \
+            ${{ env.IMAGE_NAME }}:latest \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-amd64 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-386 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-arm64 \
+              --amend ${{ env.IMAGE_NAME }}:${{ env.PHP80 }}-fpm-${{ matrix.os }}-armv7
+          docker manifest push ${{ env.IMAGE_NAME }}:latest
+
+      - name: Remove arch tag
+        run: |
+          LOGIN=$(echo -e "{\n  \"username\": \"${{ secrets.DOCKER_USERNAME }}\",\n  \"password\": \"${{ secrets.DOCKER_PASSWORD }}\"\n}\n")
+          TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d "$LOGIN" "https://hub.docker.com/v2/users/login/" | jq -r .token)
+          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP80 }}-fpm-${{ matrix.os }}-amd64/" \
+            -X DELETE \
+            -H "Authorization: JWT ${TOKEN}"
+          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP80 }}-fpm-${{ matrix.os }}-386/" \
+            -X DELETE \
+            -H "Authorization: JWT ${TOKEN}"
+          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP80 }}-fpm-${{ matrix.os }}-arm64/" \
+            -X DELETE \
+            -H "Authorization: JWT ${TOKEN}"
+          curl "https://hub.docker.com/v2/repositories/${{ env.IMAGE_NAME }}/tags/${{ env.PHP80 }}-fpm-${{ matrix.os }}-armv7/" \
+            -X DELETE \
+            -H "Authorization: JWT ${TOKEN}"
