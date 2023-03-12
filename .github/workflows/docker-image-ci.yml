@@ -59,6 +59,7 @@ jobs:
           TAGS=$(curl -s 'https://hub.docker.com/v2/repositories/library/php/tags/?page_size=100&page=1&name=fpm-alpine' | jq '.results[] | {(.name): .images[].digest}')
           DIGEST=$(echo $TAGS | jq . | awk -F': ' '/"fpm-alpine"/ { print $2 }' | head -1)
           RELEASE=$(echo $TAGS | jq . | grep $DIGEST | cut -d":" -f1 | cut -d"\"" -f2 | cut -d"-" -f1 | grep -v fpm | sort -r | head -1)
+          RELEASE=8.1.16
           [ -f VERSION ] && VERSION=$(cat VERSION) || VERSION=""
           [ "$RELEASE" == "$VERSION" ] && exists='true' || exists='false'
           echo "RELEASE=$RELEASE" >> $GITHUB_ENV
