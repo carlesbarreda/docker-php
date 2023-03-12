@@ -108,7 +108,7 @@ RUN set -ex; \
     { \
 			# https://www.php.net/manual/en/errorfunc.constants.php
 			# https://github.com/docker-library/wordpress/issues/420#issuecomment-517839670
-			echo 'error_reporting = E_ERROR | E_WARNING | E_PARSE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_RECOVERABLE_ERROR'; \
+			echo 'error_reporting = (E_ERROR | E_WARNING | E_PARSE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_RECOVERABLE_ERROR) & ~E_NOTICE & ~E_DEPRECATED'; \
 			echo 'display_errors = Off'; \
 			echo 'display_startup_errors = Off'; \
 			echo 'log_errors = On'; \
