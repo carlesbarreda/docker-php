@@ -47,6 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        version: [7.4,8.0,8.1,8.2]
         os: [bullseye,alpine]
         #os: [alpine,alpine3.16,alpine3.17,buster,bullseye]
         #platform: [amd64,arm64/v8,arm/v7]
@@ -57,7 +58,7 @@ jobs:
       - name: Get Last Docker Image Release
         run: |
           TAGS=$(curl -s 'https://hub.docker.com/v2/repositories/library/php/tags/?page_size=100&page=1&name=fpm-alpine' | jq '.results[] | {(.name): .images[].digest}')
-          DIGEST=$(echo $TAGS | jq . | awk -F': ' '/"fpm-alpine"/ { print $2 }' | head -1)
+          DIGEST=$(echo $TAGS | jq . | awk -F': ' '/"${{ matrix.version }}-fpm-alpine"/ { print $2 }' | head -1)
           RELEASE=$(echo $TAGS | jq . | grep $DIGEST | cut -d":" -f1 | cut -d"\"" -f2 | cut -d"-" -f1 | grep -v fpm | sort -r | head -1)
           #RELEASE=8.1.16
           #RELEASE=8.0.28
