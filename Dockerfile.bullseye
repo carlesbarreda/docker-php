@@ -48,13 +48,13 @@ RUN set -ex; \
     apt-get install -y --no-install-recommends \
 		libbz2-dev libicu-dev libldap2-dev libldb-dev libpq-dev libxslt1-dev libzip-dev libc-client-dev \
 		libkrb5-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev libxpm-dev \
-		libmagickwand-dev libmemcached-dev zlib1g-dev libzstd-dev libedit-dev \
+		libmagickwand-dev libmemcached-dev zlib1g-dev libzstd-dev libedit-dev libgmp-dev \
     ; \
 	docker-php-ext-configure gd --with-freetype --with-jpeg --with-xpm --with-webp; \
 	docker-php-ext-configure imap --with-imap --with-imap-ssl --with-kerberos; \
 	docker-php-ext-install -j$(nproc) \
 		bz2 bcmath calendar exif gd gettext imap intl ldap mysqli pcntl pdo_mysql pdo_pgsql \
-		shmop sockets sysvmsg sysvsem sysvshm xsl zip; \
+		shmop sockets sysvmsg sysvsem sysvshm xsl zip gmp; \
         #readline
 	docker-php-ext-enable opcache; \
 	# imagick
@@ -83,7 +83,7 @@ RUN set -ex; \
 	apt-get -y remove --purge \
 		libbz2-dev libicu-dev libldap2-dev libpq-dev libxslt1-dev libzip-dev libc-client-dev libkrb5-dev \
 		libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev libxpm-dev libmagickwand-dev \
-		libmemcached-dev zlib1g-dev libzstd-dev libedit-dev \
+		libmemcached-dev zlib1g-dev libzstd-dev libedit-dev libgmp-dev \
     ; \
     \
     apt-mark auto '.*' > /dev/null; \

@@ -20,7 +20,7 @@ RUN set -eux; \
 		imagemagick \
         tzdata \
 	    libbz2 libintl icu-libs libldap libpq libxslt libzip c-client freetype libpng libjpeg-turbo \
-	    libxpm libwebp imagemagick-libs xz-libs zstd-libs libmemcached zlib
+	    libxpm libwebp imagemagick-libs xz-libs zstd-libs libmemcached zlib gmp
 
 # Install dependencies
 #https://github.com/php/php-src/issues/8681#issuecomment-1354733347
@@ -30,7 +30,7 @@ RUN set -ex; \
 		$PHPIZE_DEPS \
 		bzip2-dev gettext-dev icu-dev openldap-dev postgresql-dev libxslt-dev libzip-dev imap-dev \
 		krb5-dev openssl-dev freetype-dev libpng-dev libjpeg-turbo-dev libxpm-dev libwebp-dev \
-		libtool imagemagick-dev xz-dev zstd-dev libmemcached-dev zlib-dev \
+		libtool imagemagick-dev xz-dev zstd-dev libmemcached-dev zlib-dev gmp-dev \
 		libedit-dev linux-headers \
     ; \
 	\
@@ -38,7 +38,7 @@ RUN set -ex; \
 	docker-php-ext-configure imap --with-imap --with-imap-ssl --with-kerberos; \
 	docker-php-ext-install -j$(nproc) \
 		bz2 bcmath calendar exif gd gettext imap intl ldap mysqli pcntl pdo_mysql pdo_pgsql \
-		shmop sockets sysvmsg sysvsem sysvshm xsl zip \
+		shmop sockets sysvmsg sysvsem sysvshm xsl zip gmp \
 		#readline \
     ; \
 	\
@@ -73,7 +73,7 @@ RUN set -ex; \
 			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
 	)"; \
 	apk add --no-network --virtual .php${VERSION}-phpexts-rundeps $runDeps; \
-    apk del --no-network .build-deps
+  apk del --no-cache .build-deps
 
 # set recommended PHP.ini settings
 # see https://secure.php.net/manual/en/opcache.installation.php
