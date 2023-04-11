@@ -58,8 +58,8 @@ jobs:
 
       - name: Get Last Docker Image Release
         run: |
-          TAGS=$(curl -s 'https://hub.docker.com/v2/repositories/library/php/tags/?page_size=10000&page=1&name=fpm-${{ matrix.os }}' | jq '.results[] | {(.name): .images[].digest}')
-          DIGEST=$(echo $TAGS | jq . | awk -F': ' '/"${{ matrix.version }}-fpm-${{ matrix.os }}"/ { print $2 }' | head -1)
+          TAGS=$(curl -s 'https://hub.docker.com/v2/repositories/library/php/tags/?page_size=10000&page=1&name=fpm-bullseye' | jq '.results[] | {(.name): .images[].digest}')
+          DIGEST=$(echo $TAGS | jq . | awk -F': ' '/"${{ matrix.version }}-fpm-bullseye"/ { print $2 }' | head -1)
           RELEASE=$(echo $TAGS | jq . | grep $DIGEST | cut -d":" -f1 | cut -d"\"" -f2 | cut -d"-" -f1 | grep -v fpm | sort -r | head -1)
           #RELEASE=8.1.16
           #RELEASE=8.0.28
@@ -146,6 +146,7 @@ jobs:
   alpine:
     name: Build and push
     runs-on: ubuntu-latest
+    needs: [bullseye]
     strategy:
       matrix:
         version: [7.4,8.0,8.1,8.2]
@@ -159,8 +160,8 @@ jobs:
 
       - name: Get Last Docker Image Release
         run: |
-          TAGS=$(curl -s 'https://hub.docker.com/v2/repositories/library/php/tags/?page_size=10000&page=1&name=fpm-${{ matrix.os }}' | jq '.results[] | {(.name): .images[].digest}')
-          DIGEST=$(echo $TAGS | jq . | awk -F': ' '/"${{ matrix.version }}-fpm-${{ matrix.os }}"/ { print $2 }' | head -1)
+          TAGS=$(curl -s 'https://hub.docker.com/v2/repositories/library/php/tags/?page_size=10000&page=1&name=fpm-bullseye' | jq '.results[] | {(.name): .images[].digest}')
+          DIGEST=$(echo $TAGS | jq . | awk -F': ' '/"${{ matrix.version }}-fpm-bullseye"/ { print $2 }' | head -1)
           RELEASE=$(echo $TAGS | jq . | grep $DIGEST | cut -d":" -f1 | cut -d"\"" -f2 | cut -d"-" -f1 | grep -v fpm | sort -r | head -1)
           #RELEASE=8.1.16
           #RELEASE=8.0.28
