@@ -107,6 +107,11 @@ ENV UPLOAD_LIMIT 2048K
 RUN set -ex; \
     \
     { \
+        echo ''; \
+        echo 'TLS_REQCERT never'; \
+    } >> /etc/openldap/ldap.conf; \
+    \
+    { \
         echo 'opcache.memory_consumption=128'; \
         echo 'opcache.interned_strings_buffer=8'; \
         echo 'opcache.max_accelerated_files=4000'; \
