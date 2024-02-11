@@ -4,7 +4,7 @@ on:
     - cron: '00 23 * * 0'
 
   push:
-    branches: [ "dev" ]
+    branches: [ "main", "dev" ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
 
@@ -20,6 +20,15 @@ on:
       types: [published]
 
   workflow_dispatch:
+    inputs:
+      xtags:
+        description: 'Cerbot version tag'
+        required: true
+        default: 'v1.10.1'
+      xlatest:
+        description: 'Is latest?'
+        required: true
+        default: 'yes'
 
 env:
   # Use docker.io for Docker Hub if empty
