@@ -20,15 +20,6 @@ on:
       types: [published]
 
   workflow_dispatch:
-    inputs:
-      xtags:
-        description: 'Cerbot version tag'
-        required: true
-        default: 'v1.10.1'
-      xlatest:
-        description: 'Is latest?'
-        required: true
-        default: 'yes'
 
 env:
   # Use docker.io for Docker Hub if empty
