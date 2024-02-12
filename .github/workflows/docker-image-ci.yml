@@ -47,8 +47,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        #version: [7.4,8.0,8.1,8.2]
-        version: [8.2,8.3]
+        #version: [7.4,8.0,8.1,8.2,8.3]
+        version: [8.2]
         #os: [bullseye,bookworm,alpine]
         os: [bullseye]
         #os: [alpine,alpine3.16,alpine3.17,buster,bullseye,bookworm]
@@ -150,8 +150,8 @@ jobs:
     needs: [debian]
     strategy:
       matrix:
-        #version: [7.4,8.0,8.1,8.2]
-        version: [8.2,8.3]
+        #version: [7.4,8.0,8.1,8.2,8.3]
+        version: [8.2]
         #os: [bullseye,alpine]
         os: [alpine]
         #os: [alpine,alpine3.16,alpine3.17,buster,bullseye]
