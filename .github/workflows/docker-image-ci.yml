@@ -134,7 +134,8 @@ jobs:
         with:
           context: .
           file: ./Dockerfile.${{ matrix.os }}
-          platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
+          #platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
+          platforms: linux/amd64,linux/arm64/v8
           tags: ${{ steps.meta-image.outputs.tags }}
           labels: ${{ steps.meta-image.outputs.labels }}
           build-args: |
@@ -237,7 +238,8 @@ jobs:
         with:
           context: .
           file: ./Dockerfile.${{ matrix.os }}
-          platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
+          #platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
+          platforms: linux/amd64,linux/arm64/v8
           tags: ${{ steps.meta-image.outputs.tags }}
           labels: ${{ steps.meta-image.outputs.labels }}
           build-args: |
