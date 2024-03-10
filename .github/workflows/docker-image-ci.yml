@@ -113,13 +113,13 @@ jobs:
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
+      #${{ matrix.os == 'alpine' && format('{0}-latest', matrix.version) }}
+      #${{ matrix.os == 'alpine' && 'latest' }}
       - name: Extract Docker metadata
         id: meta-image
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            #${{ matrix.os == 'alpine' && format('{0}-latest', matrix.version) }}
-            #${{ matrix.os == 'alpine' && 'latest' }}
           tags: |
             ${{ env.RELEASE }}-fpm-${{ matrix.os }}
             ${{ matrix.version }}-fpm-${{ matrix.os }}
