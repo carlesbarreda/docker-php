@@ -61,9 +61,8 @@ jobs:
         #version: ['8.0']
         #os: [bullseye,alpine]
         #version: ['8.1','8.2']
-        #os: [bullseye,bookworm,alpine]
         version: ['8.3']
-        os: [bookworm]
+        os: [bullseye,bookworm,alpine]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
