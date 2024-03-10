@@ -59,7 +59,7 @@ RUN set -ex; \
 	docker-php-ext-enable opcache; \
 	# apcu imagick igbinary msgpack xdebug
 	echo 'no' | pecl install apcu; \
-	pecl install imagick; \
+	pecl install imagick-6.9; \
 	pecl install igbinary; \
 	pecl install msgpack; \
 	pecl install xdebug; \
