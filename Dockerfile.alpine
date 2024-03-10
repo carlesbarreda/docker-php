@@ -45,9 +45,8 @@ RUN set -ex; \
 	pecl install imagick; \
 	pecl install igbinary; \
 	pecl install msgpack; \
-	docker-php-ext-enable apcu imagick igbinary msgpack; \
-	#pecl install xdebug; \
-	#docker-php-ext-enable apcu imagick igbinary msgpack xdebug; \
+	pecl install xdebug; \
+	docker-php-ext-enable apcu imagick igbinary msgpack xdebug; \
 	# redis memcached
 	echo -en 'yes\nyes\nyes\n' | pecl install redis; \
 	echo -en 'no\nno\nno\nyes\nno\nyes\nno\nyes\nyes\n' | pecl install memcached; \
