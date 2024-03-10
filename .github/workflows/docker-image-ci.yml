@@ -35,8 +35,8 @@ env:
   VENDOR: Carles Barreda
   GIT_NAME: Carles Barreda
   GIT_MAIL: 9409275+carlesbarreda@users.noreply.github.com
-  PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
-  #PLATFORMS: linux/amd64,linux/arm64/v8
+  #PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
+  PLATFORMS: linux/amd64
 
 permissions:
   contents: write
@@ -54,7 +54,7 @@ jobs:
         #platform: [amd64,arm64/v8,arm/v7]
         #version: [8.2,8.3]
         version: [8.3]
-        os: [bookworm,alpine]
+        os: [alpine]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
