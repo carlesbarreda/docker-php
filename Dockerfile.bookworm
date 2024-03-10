@@ -102,7 +102,7 @@ RUN set -ex; \
     { \
         echo ''; \
         echo 'TLS_REQCERT never'; \
-    } >> /etc/openldap/ldap.conf; \
+    } >> /etc/ldap/ldap.conf; \
     \
     { \
         echo 'opcache.memory_consumption=128'; \
