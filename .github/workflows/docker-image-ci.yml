@@ -37,7 +37,7 @@ env:
   GIT_MAIL: 9409275+carlesbarreda@users.noreply.github.com
   PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
   LATEST_OS: alpine
-  LATEST_VER: '8.2'
+  LATEST_VER: '8.3'
 
 permissions:
   contents: write
@@ -61,7 +61,7 @@ jobs:
         #version: ['8.0']
         #os: [bullseye,alpine]
         #version: ['8.1','8.2']
-        version: ['8.3']
+        version: ['8.1','8.2','8.3']
         os: [bullseye,bookworm,alpine]
     steps:
       - name: Checkout code
@@ -116,6 +116,9 @@ jobs:
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
+      #      ${{ matrix.os == env.LATEST_OS && env.RELEASE || '' }}
+      #      ${{ matrix.os == env.LATEST_OS && matrix.version || '' }}
+      #      ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && format('{0}-latest', matrix.version) || '' }}
       - name: Extract Docker metadata
         id: meta-image
         uses: docker/metadata-action@v5
@@ -124,9 +127,6 @@ jobs:
           tags: |
             ${{ env.RELEASE }}-fpm-${{ matrix.os }}
             ${{ matrix.version }}-fpm-${{ matrix.os }}
-            ${{ matrix.os == env.LATEST_OS && env.RELEASE || '' }}
-            ${{ matrix.os == env.LATEST_OS && matrix.version || '' }}
-            ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && format('{0}-latest', matrix.version) || '' }}
             ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && 'latest' || '' }}
           labels: |
             org.opencontainers.image.authors=${{ env.AUTHORS }}
