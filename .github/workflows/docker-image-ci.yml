@@ -73,7 +73,8 @@ jobs:
           TAGS=$(curl -s 'https://hub.docker.com/v2/repositories/library/php/tags/?page_size=10000&page=1&name=${{ matrix.version }}%25-fpm-${{ matrix.os }}' | jq '.results[] | {(.name): .images[].digest}')
           DIGEST=$(echo $TAGS | jq . | awk -F': ' '/"${{ matrix.version }}-fpm-${{ matrix.os }}"/ { print $2 }' | head -1)
           RELEASE=$(echo $TAGS | jq . | grep $DIGEST | cut -d":" -f1 | cut -d"\"" -f2 | cut -d"-" -f1 | grep -v fpm | sort -r | head -1)
-          [ -f VERSION ] && VERSION=$(cat VERSION) || VERSION=""
+          [ -f VERSION.FAKE ] && VERSION=$(cat VERSION) || VERSION=""
+          VERSION=""
           [ "$RELEASE" == "$VERSION" ] && exists='true' || exists='false'
           echo "RELEASE=$RELEASE" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
