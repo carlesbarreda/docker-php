@@ -5,25 +5,11 @@ FROM php:$VERSION-fpm-$BASEIMAGE
 
 ARG TARGETPLATFORM
 
-#docker buildx build --platform linux/amd64,linux/arm64/v8,linux/arm/v7 --build-arg VERSION=8.2.3 --build-arg BASEIMAGE=bullseye -t carlesbarreda/php:8.2.3-fpm-bullseye --push -f Dockerfile.alpine .
-
 ENV DEBIAN_FRONTEND noninteractive
 
  # Persistent dependencies
 RUN set -eux; \
     \
-    ## https://serverfault.com/questions/633394/php-configure-not-finding-ldap-header-libraries
-    #if [ ${TARGETPLATFORM} = linux/386 ]; then \
-    #    ln -s /usr/lib/i386-linux-gnu/libldap.so /usr/lib/libldap.so; \
-    #    ln -s /usr/lib/i386-linux-gnu/liblber.so /usr/lib/liblber.so; \
-    #fi; \
-    ## https://github.com/docker/buildx/issues/495#issuecomment-772267281
-    #if [ ${TARGETPLATFORM} = linux/arm64 || ${TARGETPLATFORM} = linux/arm/v7 ]; then \
-    #    ln -s /usr/bin/dpkg-split /usr/sbin; \
-    #    ln -s /usr/bin/dpkg-deb /usr/sbin; \
-    #    ln -s /bin/tar /usr/sbin; \
-    #    ln -s /bin/rm /usr/sbin; \
-    #fi; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
 # Ghostscript is required for rendering PDF previews
@@ -34,14 +20,6 @@ RUN set -eux; \
 
 # Install dependencies
 RUN set -ex; \
-    \
-    ## https://github.com/docker/buildx/issues/495#issuecomment-772267281
-    #if [ ${TARGETPLATFORM} = linux/arm64 || ${TARGETPLATFORM} = linux/arm/v7 ]; then \
-    #    ln -s /usr/bin/dpkg-split /usr/sbin; \
-    #    ln -s /usr/bin/dpkg-deb /usr/sbin; \
-    #    ln -s /bin/tar /usr/sbin; \
-    #    ln -s /bin/rm /usr/sbin; \
-    #fi; \
     \
     savedAptMark="$(apt-mark showmanual)"; \
     \

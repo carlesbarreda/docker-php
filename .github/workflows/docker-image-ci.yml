@@ -35,6 +35,8 @@ env:
   VENDOR: Carles Barreda
   GIT_NAME: Carles Barreda
   GIT_MAIL: 9409275+carlesbarreda@users.noreply.github.com
+  PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
+  #PLATFORMS: linux/amd64,linux/arm64/v8
 
 permissions:
   contents: write
@@ -48,11 +50,9 @@ jobs:
     strategy:
       matrix:
         #version: [7.4,8.0,8.1,8.2,8.3]
-        #os: [bullseye,bookworm,alpine]
         #os: [alpine,alpine3.16,alpine3.17,buster,bullseye,bookworm]
         #platform: [amd64,arm64/v8,arm/v7]
-        version: [8.2]
-        #os: [bullseye]
+        version: [8.2,8.3]
         os: [bookworm]
     steps:
       - name: Checkout code
@@ -136,7 +136,8 @@ jobs:
           context: .
           file: ./Dockerfile.${{ matrix.os }}
           #platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
-          platforms: linux/amd64,linux/arm64/v8
+          #platforms: linux/amd64,linux/arm64/v8
+          platforms: ${{ env.PLATFORMS }}
           tags: ${{ steps.meta-image.outputs.tags }}
           labels: ${{ steps.meta-image.outputs.labels }}
           build-args: |
@@ -156,7 +157,7 @@ jobs:
         #os: [bullseye,alpine]
         #os: [alpine,alpine3.16,alpine3.17,buster,bullseye]
         #platform: [amd64,arm64/v8,arm/v7]
-        version: [8.2]
+        version: [8.2,8.3]
         os: [alpine]
     steps:
       - name: Checkout code
@@ -240,7 +241,8 @@ jobs:
           context: .
           file: ./Dockerfile.${{ matrix.os }}
           #platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
-          platforms: linux/amd64,linux/arm64/v8
+          #platforms: linux/amd64,linux/arm64/v8
+          platforms: ${{ env.PLATFORMS }}
           tags: ${{ steps.meta-image.outputs.tags }}
           labels: ${{ steps.meta-image.outputs.labels }}
           build-args: |

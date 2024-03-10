@@ -3,10 +3,6 @@ ARG VERSION
 ARG BASEIMAGE
 FROM php:$VERSION-fpm-$BASEIMAGE
 
-#ARG TARGETPLATFORM
-
-#docker buildx build --platform linux/amd64,linux/arm64/v8,linux/arm/v7 --build-arg VERSION=8.2.3 --build-arg BASEIMAGE=alpine3.17 -t carlesbarreda/php:8.2.3-fpm-alpine3.17 --push -f Dockerfile.alpine .
-
 # Persistent dependencies
 RUN set -eux; \
     apk add --no-cache \
