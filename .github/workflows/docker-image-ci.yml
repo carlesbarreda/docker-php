@@ -35,8 +35,7 @@ env:
   VENDOR: Carles Barreda
   GIT_NAME: Carles Barreda
   GIT_MAIL: 9409275+carlesbarreda@users.noreply.github.com
-  #PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
-  PLATFORMS: linux/amd64
+  PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
 
 permissions:
   contents: write
@@ -59,10 +58,8 @@ jobs:
         #version: ['7.4'] <-- without xdebug extension
         #version: ['8.0']
         #os: [bullseye,alpine]
-        #version: ['8.1','8.2']
-        #os: [bullseye,bookworm,alpine]
-        version: ['8.3']
-        os: [alpine]
+        version: ['8.1','8.2','8.3']
+        os: [bullseye,bookworm,alpine]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -116,10 +113,6 @@ jobs:
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
-      #      ${{ matrix.version }}-latest
-      #      latest
-      #      ${{ matrix.os == 'alpine' && format('{0}-latest', matrix.version) }} || ''
-      #      ${{ matrix.os == 'alpine' && 'latest' }} || ''
       - name: Extract Docker metadata
         id: meta-image
         uses: docker/metadata-action@v5
@@ -130,8 +123,8 @@ jobs:
             ${{ matrix.version }}-fpm-${{ matrix.os }}
             ${{ env.RELEASE }}
             ${{ matrix.version }}
-            ${{ matrix.os == 'alpine' && format('{0}-latest', matrix.version) }} || ''
-            ${{ matrix.os == 'alpine' && 'latest' }} || ''
+            ${{ matrix.os == 'alpine' && format('{0}-latest', matrix.version) || '' }}
+            ${{ matrix.os == 'alpine' && 'latest' || '' }}
           labels: |
             org.opencontainers.image.authors=${{ env.AUTHORS }}
             org.opencontainers.image.vendor=${{ env.VENDOR }}
