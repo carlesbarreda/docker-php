@@ -36,6 +36,8 @@ env:
   GIT_NAME: Carles Barreda
   GIT_MAIL: 9409275+carlesbarreda@users.noreply.github.com
   PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
+  LATEST_OS: alpine
+  LATEST_VER: '8.2'
 
 permissions:
   contents: write
@@ -58,10 +60,10 @@ jobs:
         #version: ['7.4'] <-- without xdebug extension
         #version: ['8.0']
         #os: [bullseye,alpine]
-        version: ['8.1','8.2']
-        os: [bullseye,bookworm,alpine]
-        #version: ['8.3']
-        #os: [alpine]
+        #version: ['8.1','8.2']
+        #os: [bullseye,bookworm,alpine]
+        version: ['8.3']
+        os: [bullseye]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -123,10 +125,10 @@ jobs:
           tags: |
             ${{ env.RELEASE }}-fpm-${{ matrix.os }}
             ${{ matrix.version }}-fpm-${{ matrix.os }}
-            ${{ env.RELEASE }}
-            ${{ matrix.version }}
-            ${{ matrix.os == 'alpine' && format('{0}-latest', matrix.version) || '' }}
-            ${{ matrix.os == 'alpine' && 'latest' || '' }}
+            ${{ matrix.os == env.LATEST_OS && env.RELEASE || '' }}
+            ${{ matrix.os == env.LATEST_OS && matrix.version || '' }}
+            ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && format('{0}-latest', matrix.version) || '' }}
+            ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && 'latest' || '' }}
           labels: |
             org.opencontainers.image.authors=${{ env.AUTHORS }}
             org.opencontainers.image.vendor=${{ env.VENDOR }}
