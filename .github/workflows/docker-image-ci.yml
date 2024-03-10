@@ -53,7 +53,7 @@ jobs:
         #os: [alpine,alpine3.16,alpine3.17,buster,bullseye,bookworm]
         #platform: [amd64,arm64/v8,arm/v7]
         #version: [8.2,8.3]
-        version: [8.2]
+        version: [8.3]
         os: [bookworm,alpine]
     steps:
       - name: Checkout code
