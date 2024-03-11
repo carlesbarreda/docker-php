@@ -168,8 +168,6 @@ jobs:
         if: needs.build.outputs.LATEST_BUILD == 'true' && env.exists != 'true'
         run: |
           echo "${{ needs.build.outputs.LATEST }}" > VERSION
-          git config --global -l > GIT_GLOBAL_CONF
-          git config -l > GIT_CONF
           echo "COMMIT=true" >> $GITHUB_ENV
 
       - name: Commit & Push changes
