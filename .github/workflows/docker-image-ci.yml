@@ -191,11 +191,16 @@ jobs:
       #    git commit -am "Automated changes"
       #    git push
 
+      # https://github.com/actions-js/push
+      # https://github.com/actions-js/push
       - name: Commit & Push changes
         if: env.COMMIT == 'true'
         uses: actions-js/push@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          author_email: ${{ secrets.GIT_MAIL }}
+          author_name: ${{ secrets.GIT_NAME }}
+          message: Automated changes
 
       - name: Create tag
         if: env.COMMIT == 'true'
