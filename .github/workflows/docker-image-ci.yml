@@ -31,10 +31,7 @@ env:
   exists: false
   BUILD: false
   COMMIT: false
-  #GIT_NAME: Carles Barreda
-  #GIT_MAIL: 9409275+carlesbarreda@users.noreply.github.com
-  #PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
-  PLATFORMS: linux/amd64
+  PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
   LATEST_OS: alpine
   LATEST_VER: '8.3'
   LATEST_BUILD: false
@@ -61,11 +58,8 @@ jobs:
         #version: ['7.4'] <-- without xdebug extension
         #version: ['8.0']
         #os: [bullseye,alpine]
-        #version: ['8.1','8.2']
-        #version: ['8.1','8.2','8.3']
-        #os: [bullseye,bookworm,alpine]
-        version: ['8.3']
-        os: [alpine]
+        version: ['8.1','8.2','8.3']
+        os: [bullseye,bookworm,alpine]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -121,9 +115,6 @@ jobs:
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
-      #      ${{ matrix.os == env.LATEST_OS && env.RELEASE || '' }}
-      #      ${{ matrix.os == env.LATEST_OS && matrix.version || '' }}
-      #      ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && format('{0}-latest', matrix.version) || '' }}
       - name: Extract Docker metadata
         id: meta-image
         uses: docker/metadata-action@v5
