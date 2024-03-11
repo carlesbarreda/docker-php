@@ -193,14 +193,27 @@ jobs:
 
       # https://github.com/actions-js/push
       # https://github.com/actions-js/push
+      #- name: Commit & Push changes
+      #  if: env.COMMIT == 'true'
+      #  uses: actions-js/push@master
+      #  with:
+      #    github_token: ${{ secrets.GITHUB_TOKEN }}
+      #    author_email: ${{ secrets.GIT_MAIL }}
+      #    author_name: ${{ secrets.GIT_NAME }}
+      #    message: Automated changes
+
+      # https://github.com/marketplace/actions/add-commit-and-push
+
+      # Push a commit using the built-in token
+      # https://github.com/actions/checkout?tab=readme-ov-file#Push-a-commit-using-the-built-in-token
       - name: Commit & Push changes
         if: env.COMMIT == 'true'
-        uses: actions-js/push@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          author_email: ${{ secrets.GIT_MAIL }}
-          author_name: ${{ secrets.GIT_NAME }}
-          message: Automated changes
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email github-actions[bot]@users.noreply.github.com
+          git add .
+          git commit -am "'chore: autopublish ${date}'"
+          git push
 
       - name: Create tag
         if: env.COMMIT == 'true'
