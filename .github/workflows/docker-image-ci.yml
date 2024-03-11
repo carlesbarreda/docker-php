@@ -166,6 +166,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
 
       - name: Get Last Docker Image Release
         run: |
@@ -179,14 +182,20 @@ jobs:
           echo "${{ needs.build.outputs.LATEST }}" > VERSION
           echo "COMMIT=true" >> $GITHUB_ENV
 
-      - name: Commit Changes
+      #- name: Commit Changes
+      #  if: env.COMMIT == 'true'
+      #  run: |
+      #    git config --global user.name '${{ secrets.GIT_NAME }}'
+      #    git config --global user.email '${{ secrets.GIT_MAIL }}'
+      #    git add .
+      #    git commit -am "Automated changes"
+      #    git push
+
+      - name: Commit & Push changes
         if: env.COMMIT == 'true'
-        run: |
-          git config --global user.name '${{ secrets.GIT_NAME }}'
-          git config --global user.email '${{ secrets.GIT_MAIL }}'
-          git add .
-          git commit -am "Automated changes"
-          git push
+        uses: actions-js/push@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create tag
         if: env.COMMIT == 'true'
