@@ -170,13 +170,13 @@ jobs:
       - name: Get Last Docker Image Release
         run: |
           [ -f VERSION ] && VERSION=$(cat VERSION) || VERSION=""
-          [ "${{ build.outputs.LATEST }}" != "" && "${{ build.outputs.LATEST }}" == $VERSION ] && exists='true' || exists='false'
+          [ "${{ needs.build.outputs.LATEST }}" != "" && "${{ needs.build.outputs.LATEST }}" == $VERSION ] && exists='true' || exists='false'
           echo "exists=$exists" >> $GITHUB_ENV
 
       - name: Update VERSION file
-        if: build.outputs.LATEST_BUILD == 'true' && env.exists != 'true'
+        if: needs.build.outputs.LATEST_BUILD == 'true' && env.exists != 'true'
         run: |
-          echo "${{ build.outputs.LATEST }}" > VERSION
+          echo "${{ needs.build.outputs.LATEST }}" > VERSION
           echo "COMMIT=true" >> $GITHUB_ENV
 
       - name: Commit Changes
@@ -198,6 +198,6 @@ jobs:
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: "refs/tags/${{ build.outputs.LATEST }}",
+              ref: "refs/tags/${{ needs.build.outputs.LATEST }}",
               sha: context.sha
             })
