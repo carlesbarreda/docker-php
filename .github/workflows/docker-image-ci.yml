@@ -166,14 +166,15 @@ jobs:
           echo "exists=$exists" >> $GITHUB_ENV
           echo "COMMIT=$COMMIT" >> $GITHUB_ENV
 
-      - name: Update VERSION file
-        if: env.COMMIT
-        run: |
-          echo "${{ needs.build.outputs.LATEST }}" > VERSION
+      #- name: Update VERSION file
+      #  if: env.COMMIT
+      #  run: |
+      #    echo "${{ needs.build.outputs.LATEST }}" > VERSION
 
       - name: Commit & Push changes
         if: env.COMMIT
         run: |
+          echo "${{ needs.build.outputs.LATEST }}" > VERSION
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add .
