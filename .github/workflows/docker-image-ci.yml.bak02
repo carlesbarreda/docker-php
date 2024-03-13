@@ -46,6 +46,14 @@ permissions:
 # Transient Error when Building Imagick in php 8.3.x on amd64 on alpine #643
 # https://github.com/Imagick/imagick/issues/643
 
+# https://docs.docker.com/build/ci/github-actions/cache/#local-cache
+# https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
+# https://docs.docker.com/reference/cli/docker/buildx/build/#output
+# https://github.com/docker/metadata-action?tab=readme-ov-file#outputs
+# https://github.com/marketplace/actions/aqua-security-trivy#using-trivy-with-github-code-scanning
+# https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
+# https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+
 jobs:
   build:
     name: Build and push
@@ -152,7 +160,7 @@ jobs:
         id: docker-image
         with:
           context: .
-          file: ./Dockerfile.${{ matrix.os }}
+          file: ./Dockerfile.${{ matrix.version }}.${{ matrix.os }}
           platforms: ${{ env.PLATFORMS }}
           tags: ${{ steps.meta-image.outputs.tags }}
           labels: ${{ steps.meta-image.outputs.labels }}

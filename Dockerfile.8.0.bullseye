@@ -36,24 +36,13 @@ RUN set -ex; \
 		shmop sockets sysvmsg sysvsem sysvshm xsl zip gmp; \
         #readline
 	docker-php-ext-enable opcache; \
-	# imagick workaround
-	#curl -L -o /tmp/imagick.tar.gz https://github.com/Imagick/imagick/archive/7088edc353f53c4bc644573a79cdcd67a726ae16.tar.gz \
-	curl -L -o /tmp/imagick.tar.gz https://github.com/Imagick/imagick/archive/refs/tags/3.7.0.tar.gz \
-      && tar --strip-components=1 -xf /tmp/imagick.tar.gz \
-      && phpize \
-      && ./configure \
-      && make \
-      && make install \
-      && echo "extension=imagick.so" > /usr/local/etc/php/conf.d/ext-imagick.ini \
-      && rm -rf /tmp/* \
 	# apcu imagick igbinary msgpack xdebug
 	echo 'no' | pecl install apcu; \
-	#pecl install imagick; \
+	pecl install imagick; \
 	pecl install igbinary; \
 	pecl install msgpack; \
 	pecl install xdebug; \
-	docker-php-ext-enable apcu igbinary msgpack xdebug; \
-	#docker-php-ext-enable apcu imagick igbinary msgpack xdebug; \
+	docker-php-ext-enable apcu imagick igbinary msgpack xdebug; \
 	# redis memcached
 	echo 'yes\nyes\nyes' | pecl install redis; \
 	echo 'no\nno\nno\nyes\nno\nyes\nno\nyes\nyes' | pecl install memcached; \

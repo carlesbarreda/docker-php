@@ -17,7 +17,7 @@ on:
   #
 
   release:
-      types: [published]
+    types: [published]
 
   workflow_dispatch:
 
@@ -55,11 +55,11 @@ jobs:
         #version: ['7.4','8.0','8.1','8.2','8.3']
         #os: [alpine,alpine3.16,alpine3.17,buster,bullseye,bookworm]
         #platform: [amd64,arm64/v8,arm/v7]
-        #version: ['7.4'] <-- without xdebug extension
-        #version: ['8.0']
-        #os: [bullseye,alpine]
-        os: [bullseye,bookworm,alpine]
-        version: ['8.1','8.2','8.3']
+        os: [bullseye,alpine]
+        version: ['7.4','8.0']
+        #os: [bullseye,bookworm,alpine]
+        #version: ['8.1','8.2','8.3']
+        platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -152,8 +152,8 @@ jobs:
         id: docker-image
         with:
           context: .
-          file: ./Dockerfile.${{ matrix.os }}
-          platforms: ${{ env.PLATFORMS }}
+          file: ./Dockerfile.${{ matrix.version }}.${{ matrix.os }}
+          platforms: ${{ matrix.platform }}
           tags: ${{ steps.meta-image.outputs.tags }}
           labels: ${{ steps.meta-image.outputs.labels }}
           build-args: |
@@ -191,15 +191,14 @@ jobs:
           echo "exists=$exists" >> $GITHUB_ENV
           echo "COMMIT=$COMMIT" >> $GITHUB_ENV
 
-      #- name: Update VERSION file
-      #  if: env.COMMIT
-      #  run: |
-      #    echo "${{ needs.build.outputs.LATEST }}" > VERSION
+      - name: Update VERSION file
+        if: env.COMMIT
+        run: |
+          echo "${{ needs.build.outputs.LATEST }}" > VERSION
 
       - name: Commit & Push changes
         if: env.COMMIT
         run: |
-          echo "${{ needs.build.outputs.LATEST }}" > VERSION
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add .
