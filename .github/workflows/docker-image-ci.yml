@@ -28,14 +28,9 @@ env:
   # github.repository as <account>/<repo>
   #IMAGE_NAME: ${{ github.repository }}
   IMAGE_NAME: carlesbarreda/php
-  #exists: false
-  BUILD: false
-  #COMMIT: false
   PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
   LATEST_OS: alpine
   LATEST_VER: '7.4'
-  LATEST_BUILD: false
-  LATEST: ''
 
 permissions:
   contents: write
@@ -68,7 +63,8 @@ jobs:
         #version: ['7.4','8.0']
         version: ['7.4']
         os: [bullseye,alpine]
-        platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
+        #platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
+        platform: [env.PLATFORMS]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -91,7 +87,8 @@ jobs:
 
       - name: Check If Need Build
         run: |
-          BUILD=${{ env.BUILD }}
+          BUILD=false
+          LATEST_BUILD=false
           [[ ${{ ! steps.checkTag.outputs.exists }} ]] && BUILD=true
           [[ '${{ github.event_name }}' == 'push' ]] && BUILD=true
           [[ '${{ github.event_name }}' != 'pull_request' ]] && BUILD=false
@@ -120,7 +117,6 @@ jobs:
       # https://docs.docker.com/build/ci/github-actions/cache/#local-cache
       - name: Cache Docker layers
         if: env.BUILD == true
-        
         uses: actions/cache@v4
         id: cache
         env:
@@ -189,6 +185,8 @@ jobs:
           mkdir -p /tmp/${{ matrix.version }}-${{ matrix.os }}
           echo "BUILD=${{ env.BUILD }}" >> "/tmp/${{ matrix.version }}-${{ matrix.os }}/env"
           echo "RELEASE=${{ env.RELEASE }}" >> "/tmp/${{ matrix.version }}-${{ matrix.os }}/env"
+          echo "LATEST_BUILD=${{ env.LATEST_BUILD }}" >> "/tmp/${{ matrix.version }}-${{ matrix.os }}/env"
+          echo "LATEST=${{ env.LATEST }}" >> "/tmp/${{ matrix.version }}-${{ matrix.os }}/env"
 
       - name: Export digest
         if: env.BUILD == true
@@ -205,9 +203,9 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-    outputs:
-      LATEST_BUILD: ${{ env.LATEST_BUILD }}
-      LATEST: ${{ env.LATEST }}
+    #outputs:
+    #  LATEST_BUILD: ${{ env.LATEST_BUILD }}
+    #  LATEST: ${{ env.LATEST }}
 
   tag:
     name: Update VERSION and create tag
@@ -290,16 +288,15 @@ jobs:
       - name: Get Last Docker Image Release
         run: |
           [ -f VERSION ] && VERSION=$(cat VERSION) || VERSION=""
-          [ "${{ needs.build.outputs.LATEST }}" != "" && "${{ needs.build.outputs.LATEST }}" == $VERSION ] && exists=true || exists=false
-          [ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && needs.build.outputs.LATEST_BUILD }} && ! $exists ] && COMMIT=true || COMMIT=false
+          [ "${{ env.LATEST }}" != "" && "${{ env.LATEST }}" == $VERSION ] && exists=true || exists=false
+          [ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && env.LATEST_BUILD }} && ! $exists ] && COMMIT=true || COMMIT=false
           echo "exists=$exists" >> $GITHUB_ENV
           echo "COMMIT=$COMMIT" >> $GITHUB_ENV
-          echo "COMMIT=$COMMIT"
 
       - name: Update VERSION file
         if: env.COMMIT == true
         run: |
-          echo "${{ needs.build.outputs.LATEST }}" > VERSION
+          echo "${{ env.LATEST }}" > VERSION
 
       - name: Commit & Push changes
         if: env.COMMIT == true
@@ -320,6 +317,6 @@ jobs:
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: "refs/tags/${{ needs.build.outputs.LATEST }}",
+              ref: "refs/tags/${{ env.LATEST }}",
               sha: context.sha
             })
