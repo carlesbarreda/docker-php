@@ -126,12 +126,9 @@ jobs:
           cache-name: cache-buildx
         with:
           path: /tmp/.buildx-cache
-          #key: ${{ runner.os }}-buildx-${{ matrix.version }}-fpm-${{ matrix.os }}-${{ github.sha }}
-          #restore-keys: |
-          #  ${{ runner.os }}-buildx-${{ matrix.version }}-fpm-${{ matrix.os }}-
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-${{ matrix.version }}-fpm-${{ matrix.os }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-${{ matrix.version }}-fpm-${{ matrix.os }}-
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
