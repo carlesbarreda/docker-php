@@ -33,7 +33,7 @@ env:
   COMMIT: false
   PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
   LATEST_OS: alpine
-  LATEST_VER: '8.3'
+  LATEST_VER: '7.4'
   LATEST_BUILD: false
   LATEST: ''
 
@@ -223,7 +223,6 @@ jobs:
         #version: ['7.4','8.0']
         version: ['7.4']
         os: [bullseye,alpine]
-        #platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
