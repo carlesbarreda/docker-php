@@ -289,7 +289,7 @@ jobs:
       - name: Inspect image
         if: env.BUILD
         run: |
-          docker buildx imagetools inspect ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+          docker buildx imagetools inspect ${{ env.IMAGE_NAME }}:${{ steps.meta-image.outputs.version }}
 
       - name: Get Last Docker Image Release
         if: matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER
