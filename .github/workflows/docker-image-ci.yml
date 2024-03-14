@@ -151,10 +151,10 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.IMAGE_NAME }}
-          #tags: |
-          #  ${{ env.RELEASE }}-fpm-${{ matrix.os }}
-          #  ${{ matrix.version }}-fpm-${{ matrix.os }}
-          #  ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && 'latest' || '' }}
+          tags: |
+            ${{ env.RELEASE }}-fpm-${{ matrix.os }}
+            ${{ matrix.version }}-fpm-${{ matrix.os }}
+            ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && 'latest' || '' }}
           labels: |
             org.opencontainers.image.authors=${{ secrets.AUTHORS }}
             org.opencontainers.image.vendor=${{ secrets.VENDOR }}
@@ -168,7 +168,7 @@ jobs:
           context: .
           file: ./Dockerfile.${{ matrix.version }}.${{ matrix.os }}
           platforms: ${{ matrix.platform }}
-          tags: ${{ steps.meta-image.outputs.tags }}
+          #tags: ${{ steps.meta-image.outputs.tags }}
           labels: ${{ steps.meta-image.outputs.labels }}
           build-args: |
             BUILDTIME=${{ fromJSON(steps.meta-image.outputs.json).labels['org.opencontainers.image.created'] }}
