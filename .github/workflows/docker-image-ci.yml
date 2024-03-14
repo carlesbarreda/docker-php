@@ -63,8 +63,7 @@ jobs:
         #version: ['7.4','8.0']
         version: ['7.4']
         os: [bullseye,alpine]
-        #platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
-        platform: [env.PLATFORMS]
+        platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
