@@ -90,7 +90,7 @@ jobs:
           LATEST_BUILD=false
           [[ ${{ steps.checkTag.outputs.exists != true }} ]] && BUILD=true
           [[ '${{ github.event_name }}' == 'push' ]] && BUILD=true
-          [[ '${{ github.event_name }}' != 'pull_request' ]] && BUILD=false
+          [[ '${{ github.event_name }}' == 'pull_request' ]] && BUILD=false
           [[ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER }} ]] && echo "LATEST_BUILD=$BUILD" >> $GITHUB_ENV
           echo "BUILD=$BUILD" >> $GITHUB_ENV
 
