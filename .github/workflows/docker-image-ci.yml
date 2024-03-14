@@ -288,11 +288,10 @@ jobs:
           docker buildx imagetools inspect ${{ env.IMAGE_NAME }}:${{ steps.meta-image.outputs.version }}
 
       - name: Get Last Docker Image Release
-        if: matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER
         run: |
           [ -f VERSION ] && VERSION=$(cat VERSION) || VERSION=""
           [ "${{ needs.build.outputs.LATEST }}" != "" && "${{ needs.build.outputs.LATEST }}" == $VERSION ] && exists=true || exists=false
-          [ ${{ needs.build.outputs.LATEST_BUILD }} && ! $exists ] && COMMIT=true || COMMIT=false
+          [ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && needs.build.outputs.LATEST_BUILD }} && ! $exists ] && COMMIT=true || COMMIT=false
           echo "exists=$exists" >> $GITHUB_ENV
           echo "COMMIT=$COMMIT" >> $GITHUB_ENV
 
