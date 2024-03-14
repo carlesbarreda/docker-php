@@ -28,9 +28,9 @@ env:
   # github.repository as <account>/<repo>
   #IMAGE_NAME: ${{ github.repository }}
   IMAGE_NAME: carlesbarreda/php
-  exists: false
+  #exists: false
   BUILD: false
-  COMMIT: false
+  #COMMIT: false
   PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
   LATEST_OS: alpine
   LATEST_VER: '7.4'
@@ -231,7 +231,7 @@ jobs:
           pattern: ${{ matrix.version }}-${{ matrix.os }}-*
           merge-multiple: true
 
-      - name: Checkout code
+      - name: Get env
         run: |
           cat "/tmp/${{ matrix.version }}-${{ matrix.os }}/env" >> $GITHUB_ENV
 
@@ -294,6 +294,7 @@ jobs:
           [ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && needs.build.outputs.LATEST_BUILD }} && ! $exists ] && COMMIT=true || COMMIT=false
           echo "exists=$exists" >> $GITHUB_ENV
           echo "COMMIT=$COMMIT" >> $GITHUB_ENV
+          echo "COMMIT=$COMMIT"
 
       - name: Update VERSION file
         if: env.COMMIT
