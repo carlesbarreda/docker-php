@@ -91,7 +91,8 @@ jobs:
           [[ ${{ steps.checkTag.outputs.exists != true }} ]] && BUILD=true
           [[ '${{ github.event_name }}' == 'push' ]] && BUILD=true
           [[ '${{ github.event_name }}' == 'pull_request' ]] && BUILD=false
-          [[ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER }} ]] && echo "LATEST_BUILD=$BUILD" >> $GITHUB_ENV
+          [[ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER }} ]] && LATEST_BUILD=$BUILD
+          echo "LATEST_BUILD=$LATEST_BUILD" >> $GITHUB_ENV
           echo "BUILD=$BUILD" >> $GITHUB_ENV
 
       # https://github.com/docker/setup-qemu-action
