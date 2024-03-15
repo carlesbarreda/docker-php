@@ -295,8 +295,11 @@ jobs:
           echo "exists=$exists"
           echo "COMMIT=$COMMIT"
           echo "VERSION=$VERSION"
+          echo "env.LATEST_OS=${{ env.LATEST_OS }}"
           echo "matrix.os=${{ matrix.os }}"
+          echo "env.LATEST_VER=${{ env.LATEST_VER }}"
           echo "matrix.version=${{ matrix.version }}"
+          echo "env.LATEST_BUILD=${{ env.LATEST_BUILD }}"
 
       - name: Update VERSION file
         if: env.COMMIT == 'true'
