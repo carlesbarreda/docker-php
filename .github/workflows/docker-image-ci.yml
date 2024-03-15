@@ -292,6 +292,9 @@ jobs:
           [ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && env.LATEST_BUILD }} && $exists == 'false' ] && COMMIT=true || COMMIT=false
           echo "exists=$exists" >> $GITHUB_ENV
           echo "COMMIT=$COMMIT" >> $GITHUB_ENV
+          echo "exists=$exists"
+          echo "COMMIT=$COMMIT"
+          echo "VERSION=$VERSION"
 
       - name: Update VERSION file
         if: env.COMMIT == 'true'
