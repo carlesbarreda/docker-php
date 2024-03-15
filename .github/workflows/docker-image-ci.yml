@@ -289,7 +289,7 @@ jobs:
         run: |
           [ -f VERSION ] && VERSION=$(cat VERSION) || VERSION=""
           [ "${{ env.LATEST }}" != "" && "${{ env.LATEST }}" == $VERSION ] && exists=true || exists=false
-          [ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && env.LATEST_BUILD }} && ! $exists ] && COMMIT=true || COMMIT=false
+          [ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && env.LATEST_BUILD }} && $exists == 'false' ] && COMMIT=true || COMMIT=false
           echo "exists=$exists" >> $GITHUB_ENV
           echo "COMMIT=$COMMIT" >> $GITHUB_ENV
 
