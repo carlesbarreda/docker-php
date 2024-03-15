@@ -288,18 +288,8 @@ jobs:
       - name: Get Last Docker Image Release
         run: |
           [[ -f VERSION ]] && VERSION=$(cat VERSION) || VERSION=""
-          [[ "${{ env.LATEST }}" != "" && "${{ env.LATEST }}" == $VERSION ]] && exists=true || exists=false
-          [[ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && env.LATEST_BUILD }} && $exists == 'false' ]] && COMMIT=true || COMMIT=false
-          echo "exists=$exists" >> $GITHUB_ENV
+          [[ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && env.LATEST_BUILD }} && "${{ env.LATEST }}" != "" && "${{ env.LATEST }}" == $VERSION ]] && COMMIT=true || COMMIT=false
           echo "COMMIT=$COMMIT" >> $GITHUB_ENV
-          echo "exists=$exists"
-          echo "COMMIT=$COMMIT"
-          echo "VERSION=$VERSION"
-          echo "env.LATEST_OS=${{ env.LATEST_OS }}"
-          echo "matrix.os=${{ matrix.os }}"
-          echo "env.LATEST_VER=${{ env.LATEST_VER }}"
-          echo "matrix.version=${{ matrix.version }}"
-          echo "env.LATEST_BUILD=${{ env.LATEST_BUILD }}"
 
       - name: Update VERSION file
         if: env.COMMIT == 'true'
