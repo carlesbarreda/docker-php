@@ -295,6 +295,9 @@ jobs:
           echo "exists=$exists"
           echo "COMMIT=$COMMIT"
           echo "VERSION=$VERSION"
+          echo exists=$exists
+          echo COMMIT=$COMMIT
+          echo VERSION=$VERSION
 
       - name: Update VERSION file
         if: env.COMMIT == 'true'
