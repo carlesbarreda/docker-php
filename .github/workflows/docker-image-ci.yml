@@ -60,8 +60,7 @@ jobs:
         #platform: [amd64,arm64/v8,arm/v7]
         #os: [bullseye,bookworm,alpine]
         #version: ['8.1','8.2','8.3']
-        #version: ['7.4','8.0']
-        version: ['7.4']
+        version: ['7.4','8.0']
         os: [bullseye,alpine]
         platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
     steps:
@@ -218,8 +217,7 @@ jobs:
         #platform: [amd64,arm64/v8,arm/v7]
         #os: [bullseye,bookworm,alpine]
         #version: ['8.1','8.2','8.3']
-        #version: ['7.4','8.0']
-        version: ['7.4']
+        version: ['7.4','8.0']
         os: [bullseye,alpine]
     steps:
       - name: Download digests
