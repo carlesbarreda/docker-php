@@ -114,17 +114,17 @@ jobs:
       # https://github.com/marketplace/actions/cache
       # https://github.com/actions/cache
       # https://docs.docker.com/build/ci/github-actions/cache/#local-cache
-      - name: Cache Docker layers
-        if: env.BUILD == 'true'
-        uses: actions/cache@v4
-        id: cache
-        env:
-          cache-name: cache-buildx
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.version }}-fpm-${{ matrix.os }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ matrix.version }}-fpm-${{ matrix.os }}-
+      #- name: Cache Docker layers
+      #  if: env.BUILD == 'true'
+      #  uses: actions/cache@v4
+      #  id: cache
+      #  env:
+      #    cache-name: cache-buildx
+      #  with:
+      #    path: /tmp/.buildx-cache
+      #    key: ${{ runner.os }}-buildx-${{ matrix.version }}-fpm-${{ matrix.os }}-${{ github.sha }}
+      #    restore-keys: |
+      #      ${{ runner.os }}-buildx-${{ matrix.version }}-fpm-${{ matrix.os }}-
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
@@ -168,16 +168,16 @@ jobs:
             VERSION=${{ fromJSON(steps.meta-image.outputs.json).labels['org.opencontainers.image.version'] }}
             BASEIMAGE=${{ matrix.os }}
             REVISION=${{ fromJSON(steps.meta-image.outputs.json).labels['org.opencontainers.image.revision'] }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          #cache-from: type=local,src=/tmp/.buildx-cache
+          #cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
           outputs: type=image,name=${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
           #push: true
 
-      - name: Move cache
-        if: env.BUILD == 'true'
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      #- name: Move cache
+      #  if: env.BUILD == 'true'
+      #  run: |
+      #    rm -rf /tmp/.buildx-cache
+      #    mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Results
         run: |
