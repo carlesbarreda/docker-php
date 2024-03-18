@@ -217,9 +217,10 @@ jobs:
         #os: [alpine,alpine3.16,alpine3.17,buster,bullseye,bookworm]
         #platform: [amd64,arm64/v8,arm/v7]
         #version: ['7.4','8.0']
-        os: [bullseye,alpine]
-        #os: [bullseye,bookworm,alpine]
-        version: ['8.1','8.2','8.3']
+        #os: [bullseye,alpine]
+        os: [bullseye,bookworm,alpine]
+        #version: ['8.1','8.2','8.3']
+        version: ['8.1']
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
