@@ -30,7 +30,7 @@ env:
   IMAGE_NAME: carlesbarreda/php
   PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
   LATEST_OS: alpine
-  LATEST_VER: '8.2'
+  LATEST_VER: '8.3'
 
 permissions:
   contents: write
@@ -61,7 +61,7 @@ jobs:
         #version: ['7.4','8.0']
         #os: [bullseye,alpine]
         #version: ['8.1','8.2','8.3']
-        version: ['8.2']
+        version: ['8.3']
         os: [bullseye,bookworm,alpine]
         platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
     steps:
@@ -216,7 +216,7 @@ jobs:
         #version: ['7.4','8.0']
         #os: [bullseye,alpine]
         #version: ['8.1','8.2','8.3']
-        version: ['8.2']
+        version: ['8.3']
         os: [bullseye,bookworm,alpine]
     steps:
       - name: Download digests
