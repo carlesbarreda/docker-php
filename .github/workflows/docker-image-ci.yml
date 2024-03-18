@@ -21,12 +21,17 @@ on:
 
 env:
   # Use docker.io for Docker Hub if empty
-  #REGISTRY: ghcr.io
-  REGISTRY: docker.io
+  #REGISTRY: 'ghcr.io'
+  REGISTRY: 'docker.io'
   # github.repository as <account>/<repo>
   #IMAGE_NAME: ${{ github.repository }}
-  IMAGE_NAME: carlesbarreda/php
-  LATEST_OS: alpine
+  IMAGE_NAME: 'carlesbarreda/php'
+  #VERSIONS: "['7.4','8.0']"
+  #OSES: "['bullseye','alpine']"
+  VERSIONS: "['8.1','8.2','8.3']"
+  OSES: "['bullseye','bookworm','alpine']"
+  PLATFORMS: "['linux/amd64','linux/arm64/v8','linux/arm/v7']"
+  LATEST_OS: 'alpine'
   LATEST_VER: '8.3'
 
 permissions:
@@ -55,9 +60,12 @@ jobs:
         #version: ['7.4','8.0']
         #os: [bullseye,alpine]
         #version: ['8.1','8.2','8.3']
-        version: ['8.3']
-        os: [bullseye,bookworm,alpine]
-        platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
+        #version: ['8.3']
+        #os: [bullseye,bookworm,alpine]
+        #platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
+        version: ${{ fromJSON(env.VERSIONS) }}
+        os: ${{ fromJSON(env.OSES) }}
+        platform: ${{ fromJSON(env.PLATFORMS) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -210,8 +218,10 @@ jobs:
         #version: ['7.4','8.0']
         #os: [bullseye,alpine]
         #version: ['8.1','8.2','8.3']
-        version: ['8.3']
-        os: [bullseye,bookworm,alpine]
+        #version: ['8.3']
+        #os: [bullseye,bookworm,alpine]
+        version: ${{ fromJSON(env.VERSIONS) }}
+        os: ${{ fromJSON(env.OSES) }}
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
