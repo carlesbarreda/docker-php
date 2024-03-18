@@ -195,7 +195,8 @@ jobs:
     needs: [build]
     strategy:
       matrix:
-        version: ['7.4','8.0']
+        #version: ['7.4','8.0']
+        version: ['7.4']
         os: [bullseye,alpine]
         #version: ['8.1','8.2','8.3']
         #os: [bullseye,bookworm,alpine]
