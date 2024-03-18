@@ -5,7 +5,6 @@ on:
 
   push:
     branches: [ "main" ]
-    # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
 
   #pull_request:
@@ -14,7 +13,6 @@ on:
   #pull_request:
   #  branches:
   #    - main
-  #
 
   release:
     types: [published]
@@ -28,7 +26,6 @@ env:
   # github.repository as <account>/<repo>
   #IMAGE_NAME: ${{ github.repository }}
   IMAGE_NAME: carlesbarreda/php
-  PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
   LATEST_OS: alpine
   LATEST_VER: '8.3'
 
@@ -55,16 +52,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        #version: ['7.4','8.0','8.1','8.2','8.3']
-        #os: [alpine,alpine3.16,alpine3.17,buster,bullseye,bookworm]
-        #platform: [amd64,arm64/v8,arm/v7]
         #version: ['7.4','8.0']
         #os: [bullseye,alpine]
         #version: ['8.1','8.2','8.3']
         version: ['8.3']
         os: [bullseye,bookworm,alpine]
-        #platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
-        platform: [linux/amd64]
+        platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
