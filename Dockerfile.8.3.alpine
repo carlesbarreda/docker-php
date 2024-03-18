@@ -50,7 +50,7 @@ RUN set -ex; \
     && make \
     && make install \
     && echo "extension=imagick.so" > /usr/local/etc/php/conf.d/ext-imagick.ini \
-    && rm -rf /tmp/* \
+    && rm -rf /tmp/*; \
 	#pecl install imagick; \
 	pecl install igbinary; \
 	pecl install msgpack; \
