@@ -62,8 +62,9 @@ jobs:
         #os: [bullseye,alpine]
         os: [bullseye,bookworm,alpine]
         #version: ['8.1','8.2','8.3']
+        #platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
         version: ['8.2']
-        platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
+        platform: [linux/arm/v7]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
