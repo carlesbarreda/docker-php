@@ -63,9 +63,9 @@ jobs:
         #version: ['8.3']
         #os: [bullseye,bookworm,alpine]
         #platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
-        version: ${{ fromJSON(github.env.VERSIONS) }}
-        os: ${{ fromJSON(github.env.OSES) }}
-        platform: ${{ fromJSON(github.env.PLATFORMS) }}
+        version: ${{ github.env.VERSIONS }}
+        os: ${{ github.env.OSES }}
+        platform: ${{ github.env.PLATFORMS }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -220,8 +220,8 @@ jobs:
         #version: ['8.1','8.2','8.3']
         #version: ['8.3']
         #os: [bullseye,bookworm,alpine]
-        version: ${{ fromJSON(github.env.VERSIONS) }}
-        os: ${{ fromJSON(github.env.OSES) }}
+        version: ${{ github.env.VERSIONS }}
+        os: ${{ github.env.OSES }}
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
