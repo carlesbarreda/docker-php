@@ -30,7 +30,7 @@ env:
   IMAGE_NAME: carlesbarreda/php
   PLATFORMS: linux/amd64,linux/arm64/v8,linux/arm/v7
   LATEST_OS: alpine
-  LATEST_VER: '8.3'
+  LATEST_VER: '8.2'
 
 permissions:
   contents: write
@@ -62,7 +62,7 @@ jobs:
         #os: [bullseye,alpine]
         os: [bullseye,bookworm,alpine]
         #version: ['8.1','8.2','8.3']
-        version: ['8.1']
+        version: ['8.2']
         platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
     steps:
       - name: Checkout code
@@ -220,7 +220,7 @@ jobs:
         #os: [bullseye,alpine]
         os: [bullseye,bookworm,alpine]
         #version: ['8.1','8.2','8.3']
-        version: ['8.1']
+        version: ['8.2']
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
