@@ -268,7 +268,7 @@ jobs:
       - name: Get Last Docker Image Release
         run: |
           [[ -f VERSION ]] && VERSION=$(cat VERSION) || VERSION=""
-          [[ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && env.LATEST_BUILD }} && "${{ env.LATEST }}" != "" && "${{ env.LATEST }}" == $VERSION ]] && COMMIT=true || COMMIT=false
+          [[ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && env.LATEST_BUILD }} && "${{ env.LATEST }}" != "" && "${{ env.LATEST }}" != $VERSION ]] && COMMIT=true || COMMIT=false
           echo "COMMIT=$COMMIT" >> $GITHUB_ENV
           echo "LATEST_OS=${{ env.LATEST_OS }}"
           echo "LATEST_VER=${{ env.LATEST_VER }}"
