@@ -329,9 +329,7 @@ jobs:
           if [[ -n $VERS ]]; then
             for V in $VERS; do
               T=$(S='- '; for I in $(cat /tmp/results/$V/*); do echo -n "${S}${I}"; S=', '; done)
-              E="s/## PHP $V Docker Image Tags/## PHP $V Docker Image Tags\n$T/g"
-              echo $E
-              sed -i $E README.md
+              sed -i "s/## PHP $V Docker Image Tags/## PHP $V Docker Image Tags\n$T/g" README.md
             done
             COMMIT=true
           fi
