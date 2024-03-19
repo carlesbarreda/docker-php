@@ -295,7 +295,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: results-${{ matrix.version }}-${{ matrix.os }}
-          path: /tmp/results/${{ matrix.version }}/*
+          path: /tmp/results/*
           if-no-files-found: error
           retention-days: 1
 
@@ -316,6 +316,10 @@ jobs:
           path: /tmp/results
           pattern: results-*
           merge-multiple: true
+
+      - name: Test env
+        run: |
+          find /tmp/results
 
       - name: Get env
         run: |
