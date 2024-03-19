@@ -289,7 +289,8 @@ jobs:
         if: env.BUILD == 'true'
         run: |
           mkdir -p /tmp/results/${{ matrix.version }}
-          echo "${{ env.IMAGE_NAME }}:${{ env.LATEST }}-fpm-${{ matrix.os }}" >> "/tmp/results/${{ matrix.version }}/${{ matrix.os }}"
+          IMAGE=${{ env.IMAGE_NAME }}
+          echo "${IMAGE/\//\\/}:${{ env.LATEST }}-fpm-${{ matrix.os }}" >> "/tmp/results/${{ matrix.version }}/${{ matrix.os }}"
 
       - name: Upload digest
         uses: actions/upload-artifact@v4
