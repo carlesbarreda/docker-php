@@ -294,7 +294,7 @@ jobs:
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: results-${{ matrix.version }}
+          name: results-${{ matrix.version }}-${{ matrix.os }}
           path: /tmp/results/${{ matrix.version }}/*
           if-no-files-found: error
           retention-days: 1
