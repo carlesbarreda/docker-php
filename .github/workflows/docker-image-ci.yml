@@ -20,24 +20,12 @@ env:
   #IMAGE_NAME: ${{ github.repository }}
   IMAGE_NAME: 'carlesbarreda/php'
   LATEST_OS: 'alpine'
-  LATEST_VER: '7.4'
+  LATEST_VER: '8.0'
 
 permissions:
   contents: write
   packages: write
   id-token: write
-
-# Error build 8.3 with imagick extension
-# Transient Error when Building Imagick in php 8.3.x on amd64 on alpine #643
-# https://github.com/Imagick/imagick/issues/643
-
-# https://docs.docker.com/build/ci/github-actions/cache/#local-cache
-# https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
-# https://docs.docker.com/reference/cli/docker/buildx/build/#output
-# https://github.com/docker/metadata-action?tab=readme-ov-file#outputs
-# https://github.com/marketplace/actions/aqua-security-trivy#using-trivy-with-github-code-scanning
-# https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
-# https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
 
 jobs:
   build:
@@ -45,8 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        #version: ['7.4','8.0']
-        version: ['7.4']
+        version: ['7.4','8.0']
         os: [bullseye,alpine]
         #version: ['8.1','8.2','8.3']
         #os: [bullseye,bookworm,alpine]
@@ -82,7 +69,6 @@ jobs:
           echo "LATEST_BUILD=$LATEST_BUILD" >> $GITHUB_ENV
           echo "BUILD=$BUILD" >> $GITHUB_ENV
 
-      # https://github.com/docker/setup-qemu-action
       - name: Set up QEMU
         if: env.BUILD == 'true'
         uses: docker/setup-qemu-action@v3
@@ -90,21 +76,12 @@ jobs:
           image: tonistiigi/binfmt:latest
           platforms: all
 
-      # https://github.com/docker/setup-buildx-action
-      # https://github.com/docker/build-push-action/issues/755#issuecomment-1378273495
-      # https://github.com/docker/build-push-action/issues/755#issuecomment-1378680855
       - name: Set up Docker Buildx
         if: env.BUILD == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
 
-      # https://github.com/marketplace/actions/cache
-      # https://github.com/actions/cache
-      # https://docs.docker.com/build/ci/github-actions/cache/#local-cache
-      #    key: ${{ runner.os }}-buildx-${{ matrix.version }}-fpm-${{ matrix.os }}-${{ env.PLATFORM_PAIR }}-${{ github.sha }}
-      #    restore-keys: |
-      #      ${{ runner.os }}-buildx-${{ matrix.version }}-fpm-${{ matrix.os }}-${{ env.PLATFORM_PAIR }}-
       - name: Cache Docker layers
         if: env.BUILD == 'true'
         uses: actions/cache@v4
@@ -117,8 +94,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-${{ matrix.version }}-fpm-${{ matrix.os }}-${{ env.PLATFORM_PAIR }}
 
-      # Login against a Docker registry except on PR
-      # https://github.com/docker/login-action
       - name: Login to Docker Hub
         if: env.BUILD == 'true'
         uses: docker/login-action@v3
@@ -127,8 +102,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      # Extract metadata (tags, labels) for Docker
-      # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         if: env.BUILD == 'true'
         id: meta-image
@@ -198,12 +171,14 @@ jobs:
     needs: [build]
     strategy:
       matrix:
-        #version: ['7.4','8.0']
-        version: ['7.4']
+        version: ['7.4','8.0']
         os: [bullseye,alpine]
         #version: ['8.1','8.2','8.3']
         #os: [bullseye,bookworm,alpine]
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
@@ -215,21 +190,12 @@ jobs:
         run: |
           cat "/tmp/${{ matrix.version }}/${{ matrix.os }}/env" >> $GITHUB_ENV
 
-      - name: Checkout code
-        if: env.BUILD == 'true'
-        uses: actions/checkout@v4
-
-      # https://github.com/docker/setup-buildx-action
-      # https://github.com/docker/build-push-action/issues/755#issuecomment-1378273495
-      # https://github.com/docker/build-push-action/issues/755#issuecomment-1378680855
       - name: Set up Docker Buildx
         if: env.BUILD == 'true'
         uses: docker/setup-buildx-action@v3
         with:
           install: true
 
-      # Extract metadata (tags, labels) for Docker
-      # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         if: env.BUILD == 'true'
         id: meta-image
@@ -245,8 +211,6 @@ jobs:
             org.opencontainers.image.vendor=${{ secrets.VENDOR }}
             org.opencontainers.image.version=${{ env.RELEASE }}
 
-      # Login against a Docker registry except on PR
-      # https://github.com/docker/login-action
       - name: Login to Docker Hub
         if: env.BUILD == 'true'
         uses: docker/login-action@v3
@@ -267,25 +231,11 @@ jobs:
         run: |
           docker buildx imagetools inspect ${{ env.IMAGE_NAME }}:${{ steps.meta-image.outputs.version }}
 
-      - name: Create tag
-        if: env.BUILD == 'true'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ github.token }}
-          #github-token: ${{ secrets.GITHUB_TOKEN  }}
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: "refs/tags/${{ env.LATEST }}-fpm-${{ matrix.os }}",
-              sha: context.sha
-            })
-
-      - name: Results
+      - name: Create results
         run: |
           mkdir -p /tmp/results
 
-      - name: Export digest
+      - name: Add image tag
         if: env.BUILD == 'true'
         run: |
           mkdir -p /tmp/results/${{ matrix.version }}
@@ -300,11 +250,8 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-    #output:
-
-  # PROVA=$(S='- '; for L in $(cat *); do echo -n "${S}${L}"; S=', '; done)
-  tag:
-    name: Update VERSION and create tag
+  update:
+    name: Update README.md
     runs-on: ubuntu-latest
     needs: [merge]
     steps:
@@ -318,11 +265,7 @@ jobs:
           pattern: results-*
           merge-multiple: true
 
-      - name: Test env
-        run: |
-          find /tmp/results
-
-      - name: Get env
+      - name: Update README.md
         run: |
           COMMIT=false
           VERS=$(cd /tmp/results; ls -d *)
@@ -343,3 +286,70 @@ jobs:
           git add .
           git commit -am "Automated README.md update"
           git push
+
+  tags:
+    name: Create tags
+    runs-on: ubuntu-latest
+    needs: [update]
+    strategy:
+      matrix:
+        version: ['7.4','8.0']
+        os: [bullseye,alpine]
+        #version: ['8.1','8.2','8.3']
+        #os: [bullseye,bookworm,alpine]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/${{ matrix.version }}
+          pattern: ${{ matrix.version }}-${{ matrix.os }}-*
+          merge-multiple: true
+
+      - name: Get env
+        run: |
+          cat "/tmp/${{ matrix.version }}/${{ matrix.os }}/env" >> $GITHUB_ENV
+
+      - name: Create tag
+        if: env.BUILD == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          #github-token: ${{ secrets.GITHUB_TOKEN  }}
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "refs/tags/${{ env.LATEST }}-fpm-${{ matrix.os }}",
+              sha: context.sha
+            })
+
+# Error build 8.3 with imagick extension
+# Transient Error when Building Imagick in php 8.3.x on amd64 on alpine #643
+# https://github.com/Imagick/imagick/issues/643
+
+# https://docs.docker.com/build/ci/github-actions/cache/#local-cache
+# https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
+# https://docs.docker.com/reference/cli/docker/buildx/build/#output
+# https://github.com/docker/metadata-action?tab=readme-ov-file#outputs
+# https://github.com/marketplace/actions/aqua-security-trivy#using-trivy-with-github-code-scanning
+# https://stackoverflow.com/questions/59810838/how-to-get-the-short-sha-for-the-github-workflow
+# https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+
+# https://github.com/docker/setup-qemu-action
+# https://github.com/docker/setup-buildx-action
+# https://github.com/docker/build-push-action/issues/755#issuecomment-1378273495
+# https://github.com/docker/build-push-action/issues/755#issuecomment-1378680855
+# https://github.com/marketplace/actions/cache
+# https://github.com/actions/cache
+# https://docs.docker.com/build/ci/github-actions/cache/#local-cache
+# https://github.com/docker/login-action
+# https://github.com/docker/metadata-action
+
+# https://github.com/docker/setup-buildx-action
+# https://github.com/docker/build-push-action/issues/755#issuecomment-1378273495
+# https://github.com/docker/build-push-action/issues/755#issuecomment-1378680855
+# https://github.com/docker/metadata-action
+# https://github.com/docker/login-action
