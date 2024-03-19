@@ -171,24 +171,24 @@ jobs:
 
       - name: Results
         run: |
-          mkdir -p /tmp/${{ matrix.version }}-${{ matrix.os }}
-          echo "BUILD=${{ env.BUILD }}" >> "/tmp/${{ matrix.version }}-${{ matrix.os }}/env"
-          echo "RELEASE=${{ env.RELEASE }}" >> "/tmp/${{ matrix.version }}-${{ matrix.os }}/env"
-          echo "LATEST_BUILD=${{ env.LATEST_BUILD }}" >> "/tmp/${{ matrix.version }}-${{ matrix.os }}/env"
-          echo "LATEST=${{ env.LATEST }}" >> "/tmp/${{ matrix.version }}-${{ matrix.os }}/env"
+          mkdir -p /tmp/${{ matrix.version }}/${{ matrix.os }}
+          echo "BUILD=${{ env.BUILD }}" >> "/tmp/${{ matrix.version }}/${{ matrix.os }}/env"
+          echo "RELEASE=${{ env.RELEASE }}" >> "/tmp/${{ matrix.version }}/${{ matrix.os }}/env"
+          echo "LATEST_BUILD=${{ env.LATEST_BUILD }}" >> "/tmp/${{ matrix.version }}/${{ matrix.os }}/env"
+          echo "LATEST=${{ env.LATEST }}" >> "/tmp/${{ matrix.version }}/${{ matrix.os }}/env"
 
       - name: Export digest
         if: env.BUILD == 'true'
         run: |
-          mkdir -p /tmp/${{ matrix.version }}-${{ matrix.os }}/digests
+          mkdir -p /tmp/${{ matrix.version }}/${{ matrix.os }}/digests
           digest="${{ steps.docker-image.outputs.digest }}"
-          touch "/tmp/${{ matrix.version }}-${{ matrix.os }}/digests/${digest#sha256:}"
+          touch "/tmp/${{ matrix.version }}/${{ matrix.os }}/digests/${digest#sha256:}"
 
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.version }}-${{ matrix.os }}-${{ env.PLATFORM_PAIR }}
-          path: /tmp/${{ matrix.version }}-${{ matrix.os }}/*
+          path: /tmp/${{ matrix.version }}/*
           if-no-files-found: error
           retention-days: 1
 
@@ -207,13 +207,13 @@ jobs:
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
-          path: /tmp/${{ matrix.version }}-${{ matrix.os }}
+          path: /tmp/${{ matrix.version }}/${{ matrix.os }}
           pattern: ${{ matrix.version }}-${{ matrix.os }}-*
           merge-multiple: true
 
       - name: Get env
         run: |
-          cat "/tmp/${{ matrix.version }}-${{ matrix.os }}/env" >> $GITHUB_ENV
+          cat "/tmp/${{ matrix.version }}/${{ matrix.os }}/env" >> $GITHUB_ENV
 
       - name: Checkout code
         if: env.BUILD == 'true'
@@ -257,7 +257,7 @@ jobs:
 
       - name: Create manifest list and push
         if: env.BUILD == 'true'
-        working-directory: /tmp/${{ matrix.version }}-${{ matrix.os }}/digests
+        working-directory: /tmp/${{ matrix.version }}/${{ matrix.os }}/digests
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf '${{ env.IMAGE_NAME }}@sha256:%s ' *)          
@@ -267,60 +267,8 @@ jobs:
         run: |
           docker buildx imagetools inspect ${{ env.IMAGE_NAME }}:${{ steps.meta-image.outputs.version }}
 
-  tag:
-    name: Update VERSION and create tag
-    runs-on: ubuntu-latest
-    needs: [merge]
-    strategy:
-      matrix:
-        #version: ['7.4','8.0']
-        version: ['7.4']
-        #version: ['8.1','8.2','8.3']
-    steps:
-      - name: Download digests
-        uses: actions/download-artifact@v4
-        with:
-          path: /tmp/${{ matrix.version }}-${{ matrix.os }}
-          pattern: ${{ matrix.version }}-${{ matrix.os }}-*
-          merge-multiple: true
-
-      - name: Get env
-        run: |
-          cat "/tmp/${{ matrix.version }}-${{ matrix.os }}/env" >> $GITHUB_ENV
-
-      - name: Checkout code
-        if: env.BUILD == 'true'
-        uses: actions/checkout@v4
-
-      #    [[ ${{ matrix.os == env.LATEST_OS && matrix.version == env.LATEST_VER && env.LATEST_BUILD && env.LATEST != "" }} && "${{ env.LATEST }}" != $VERSION ]] && COMMIT=true || COMMIT=false
-      - name: Get Last Docker Image Release
-        run: |
-          [[ -f VERSION ]] && VERSION=$(cat VERSION) || VERSION=""
-          [[ ${{ env.LATEST_BUILD }} == 'true' && ( $VERSION == "" || "${{ env.LATEST }}" != $VERSION ) ]] && COMMIT=true || COMMIT=false
-          echo "COMMIT=$COMMIT" >> $GITHUB_ENV
-          echo "LATEST_OS=${{ env.LATEST_OS }}"
-          echo "LATEST_VER=${{ env.LATEST_VER }}"
-          echo "LATEST_BUILD=${{ env.LATEST_BUILD }}"
-          echo "LATEST=${{ env.LATEST }}"
-          echo "COMMIT=$COMMIT"
-          echo "VERSION=$VERSION"
-
-      - name: Update VERSION file
-        if: env.COMMIT == 'true'
-        run: |
-          echo "${{ env.LATEST }}" > VERSION
-
-      - name: Commit & Push changes
-        if: env.COMMIT == 'true'
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add .
-          git commit -am "Automated changes"
-          git push
-
       - name: Create tag
-        if: env.COMMIT == 'true'
+        if: env.BUILD == 'true'
         uses: actions/github-script@v7
         with:
           github-token: ${{ github.token }}
@@ -329,6 +277,65 @@ jobs:
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: "refs/tags/${{ env.LATEST }}",
+              ref: "refs/tags/${{ env.LATEST }}-fpm-${{ matrix.os }}",
               sha: context.sha
             })
+
+      - name: Results
+        run: |
+          mkdir -p /tmp/results
+
+      - name: Export digest
+        if: env.BUILD == 'true'
+        run: |
+          mkdir -p /tmp/results/${{ matrix.version }}
+          echo "${{ env.IMAGE_NAME }}:${{ env.LATEST }}-fpm-${{ matrix.os }}" >> "/tmp/results/${{ matrix.version }}/${{ matrix.os }}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-${{ matrix.version }}
+          path: /tmp/results/${{ matrix.version }}/*
+          if-no-files-found: error
+          retention-days: 1
+
+    #output:
+
+  # PROVA=$(S='- '; for L in $(cat *); do echo -n "${S}${L}"; S=', '; done)
+  tag:
+    name: Update VERSION and create tag
+    runs-on: ubuntu-latest
+    needs: [merge]
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/results
+          pattern: results-*
+          merge-multiple: true
+
+      - name: Checkout code
+        if: env.BUILD == 'true'
+        uses: actions/checkout@v4
+
+      - name: Get env
+        run: |
+          COMMIT=false
+          VERS=$(ls -d /tmp/results/*)
+          if [[ -n $VERS ]]; then
+            for V in $VERS; do
+              T=$(S='- '; for I in $(cat /tmp/results/$V/*); do echo -n "${S}${I}"; S=', '; done)
+              sed -i "s/## PHP $V Docker Image Tags/## PHP $V Docker Image Tags\n$T/g" README.md
+            done
+            COMMIT=true
+          fi
+          echo "COMMIT=$COMMIT" >> $GITHUB_ENV
+
+      - name: Commit & Push changes
+        if: env.COMMIT == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -am "Automated README.md update"
+          git push
