@@ -321,7 +321,7 @@ jobs:
       - name: Get env
         run: |
           COMMIT=false
-          VERS=$(ls -d /tmp/results/*)
+          VERS=$(cd /tmp/results; ls -d *)
           if [[ -n $VERS ]]; then
             for V in $VERS; do
               T=$(S='- '; for I in $(cat /tmp/results/$V/*); do echo -n "${S}${I}"; S=', '; done)
