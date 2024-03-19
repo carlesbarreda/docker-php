@@ -11,5 +11,7 @@
 ## PHP 8.1 Docker Image Tags
 
 ## PHP 8.0 Docker Image Tags
+- carlesbarreda/php:8.0.30-fpm-alpine, carlesbarreda/php:8.0.30-fpm-bullseye
 
 ## PHP 7.4 Docker Image Tags
+- carlesbarreda/php:7.4.33-fpm-alpine, carlesbarreda/php:7.4.33-fpm-bullseye
