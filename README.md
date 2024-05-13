@@ -5,6 +5,7 @@
 [PHP 8 docker images collection](https://hub.docker.com/repository/docker/carlesbarreda/php/)
 
 ## PHP 8.3 Docker Image Tags
+- carlesbarreda/php:8.3.7-fpm-alpine, carlesbarreda/php:8.3.7-fpm-bookworm, carlesbarreda/php:8.3.7-fpm-bullseye
 - carlesbarreda/php:8.3.6-fpm-alpine, carlesbarreda/php:8.3.6-fpm-bookworm, carlesbarreda/php:8.3.6-fpm-bullseye
 - carlesbarreda/php:8.3.6-fpm-alpine, carlesbarreda/php:8.3.6-fpm-bookworm, carlesbarreda/php:8.3.6-fpm-bullseye
 - carlesbarreda/php:8.3.6-fpm-alpine, carlesbarreda/php:8.3.6-fpm-bookworm, carlesbarreda/php:8.3.6-fpm-bullseye
@@ -15,6 +16,7 @@
 - carlesbarreda/php:8.3.4-fpm-alpine, carlesbarreda/php:8.3.4-fpm-bookworm, carlesbarreda/php:8.3.4-fpm-bullseye
 
 ## PHP 8.2 Docker Image Tags
+- carlesbarreda/php:8.2.19-fpm-alpine, carlesbarreda/php:8.2.19-fpm-bookworm, carlesbarreda/php:8.2.19-fpm-bullseye
 - carlesbarreda/php:8.2.18-fpm-alpine, carlesbarreda/php:8.2.18-fpm-bookworm, carlesbarreda/php:8.2.18-fpm-bullseye
 - carlesbarreda/php:8.2.18-fpm-alpine, carlesbarreda/php:8.2.18-fpm-bookworm, carlesbarreda/php:8.2.18-fpm-bullseye
 - carlesbarreda/php:8.2.18-fpm-alpine, carlesbarreda/php:8.2.18-fpm-bookworm, carlesbarreda/php:8.2.18-fpm-bullseye
@@ -25,6 +27,7 @@
 - carlesbarreda/php:8.2.17-fpm-alpine, carlesbarreda/php:8.2.17-fpm-bookworm, carlesbarreda/php:8.2.17-fpm-bullseye
 
 ## PHP 8.1 Docker Image Tags
+- carlesbarreda/php:8.1.28-fpm-alpine, carlesbarreda/php:8.1.28-fpm-bookworm, carlesbarreda/php:8.1.28-fpm-bullseye
 - carlesbarreda/php:8.1.28-fpm-alpine, carlesbarreda/php:8.1.28-fpm-bookworm, carlesbarreda/php:8.1.28-fpm-bullseye
 - carlesbarreda/php:8.1.28-fpm-alpine, carlesbarreda/php:8.1.28-fpm-bookworm, carlesbarreda/php:8.1.28-fpm-bullseye
 - carlesbarreda/php:8.1.28-fpm-alpine, carlesbarreda/php:8.1.28-fpm-bookworm, carlesbarreda/php:8.1.28-fpm-bullseye
