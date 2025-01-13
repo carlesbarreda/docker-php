@@ -8,6 +8,7 @@
 - carlesbarreda/php:8.3.15-fpm-alpine, carlesbarreda/php:8.3.15-fpm-bookworm, carlesbarreda/php:8.3.15-fpm-bullseye
 - carlesbarreda/php:8.3.15-fpm-alpine, carlesbarreda/php:8.3.15-fpm-bookworm, carlesbarreda/php:8.3.15-fpm-bullseye
 - carlesbarreda/php:8.3.15-fpm-alpine, carlesbarreda/php:8.3.15-fpm-bookworm, carlesbarreda/php:8.3.15-fpm-bullseye
+- carlesbarreda/php:8.3.15-fpm-alpine, carlesbarreda/php:8.3.15-fpm-bookworm, carlesbarreda/php:8.3.15-fpm-bullseye
 - carlesbarreda/php:8.3.14-fpm-alpine, carlesbarreda/php:8.3.14-fpm-bookworm, carlesbarreda/php:8.3.14-fpm-bullseye
 - carlesbarreda/php:8.3.14-fpm-alpine, carlesbarreda/php:8.3.14-fpm-bookworm, carlesbarreda/php:8.3.14-fpm-bullseye
 - carlesbarreda/php:8.3.14-fpm-alpine, carlesbarreda/php:8.3.14-fpm-bookworm, carlesbarreda/php:8.3.14-fpm-bullseye
@@ -49,6 +50,7 @@
 - carlesbarreda/php:8.2.27-fpm-alpine, carlesbarreda/php:8.2.27-fpm-bookworm, carlesbarreda/php:8.2.27-fpm-bullseye
 - carlesbarreda/php:8.2.27-fpm-alpine, carlesbarreda/php:8.2.27-fpm-bookworm, carlesbarreda/php:8.2.27-fpm-bullseye
 - carlesbarreda/php:8.2.27-fpm-alpine, carlesbarreda/php:8.2.27-fpm-bookworm, carlesbarreda/php:8.2.27-fpm-bullseye
+- carlesbarreda/php:8.2.27-fpm-alpine, carlesbarreda/php:8.2.27-fpm-bookworm, carlesbarreda/php:8.2.27-fpm-bullseye
 - carlesbarreda/php:8.2.26-fpm-alpine, carlesbarreda/php:8.2.26-fpm-bookworm, carlesbarreda/php:8.2.26-fpm-bullseye
 - carlesbarreda/php:8.2.26-fpm-alpine, carlesbarreda/php:8.2.26-fpm-bookworm, carlesbarreda/php:8.2.26-fpm-bullseye
 - carlesbarreda/php:8.2.26-fpm-alpine, carlesbarreda/php:8.2.26-fpm-bookworm, carlesbarreda/php:8.2.26-fpm-bullseye
@@ -87,6 +89,7 @@
 - carlesbarreda/php:8.2.17-fpm-alpine, carlesbarreda/php:8.2.17-fpm-bookworm, carlesbarreda/php:8.2.17-fpm-bullseye
 
 ## PHP 8.1 Docker Image Tags
+- carlesbarreda/php:8.1.31-fpm-alpine, carlesbarreda/php:8.1.31-fpm-bookworm, carlesbarreda/php:8.1.31-fpm-bullseye
 - carlesbarreda/php:8.1.31-fpm-alpine, carlesbarreda/php:8.1.31-fpm-bookworm, carlesbarreda/php:8.1.31-fpm-bullseye
 - carlesbarreda/php:8.1.31-fpm-alpine, carlesbarreda/php:8.1.31-fpm-bookworm, carlesbarreda/php:8.1.31-fpm-bullseye
 - carlesbarreda/php:8.1.31-fpm-alpine, carlesbarreda/php:8.1.31-fpm-bookworm, carlesbarreda/php:8.1.31-fpm-bullseye
