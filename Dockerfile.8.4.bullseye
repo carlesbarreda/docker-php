@@ -30,7 +30,10 @@ RUN set -ex; \
 		libmagickwand-dev libmemcached-dev zlib1g-dev libzstd-dev libedit-dev libgmp-dev \
     ; \
 	docker-php-ext-configure gd --with-freetype --with-jpeg --with-xpm --with-webp; \
-	docker-php-ext-configure imap --with-imap --with-imap-ssl --with-kerberos; \
+	# PHP 8.4: IMAP extension moved from PHP Core to PECL
+	# https://stackoverflow.com/questions/79444576/error-on-php-8-4-fpm-imap-package-install-with-dockerfile
+	# https://php.watch/versions/8.4/imap-unbundled
+	#docker-php-ext-configure imap --with-imap --with-imap-ssl --with-kerberos; \
 	docker-php-ext-install -j$(nproc) \
 		bz2 bcmath calendar exif gd gettext imap intl ldap mysqli pcntl pdo_mysql pdo_pgsql \
 		shmop sockets sysvmsg sysvsem sysvshm xsl zip gmp; \
@@ -48,11 +51,12 @@ RUN set -ex; \
       && make install \
       && echo "extension=imagick.so" > /usr/local/etc/php/conf.d/ext-imagick.ini \
       && rm -rf /tmp/*; \
+	pecl install imap; \
 	#pecl install imagick; \
 	pecl install igbinary; \
 	pecl install msgpack; \
 	pecl install xdebug; \
-	docker-php-ext-enable apcu imagick igbinary msgpack xdebug; \
+	docker-php-ext-enable apcu imap imagick igbinary msgpack xdebug; \
 	# redis memcached
 	echo 'yes\nyes\nyes' | pecl install redis; \
 	echo 'no\nno\nno\nyes\nno\nyes\nno\nyes\nyes' | pecl install memcached; \
