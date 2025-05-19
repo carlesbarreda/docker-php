@@ -37,8 +37,10 @@ jobs:
         #os: [bullseye,alpine]
         #version: ['8.1','8.2','8.3']
         #os: [bullseye,bookworm,alpine]
-        version: ['8.1','8.2','8.3','8.4']
-        os: [bullseye,bookworm,alpine]
+        #version: ['8.1','8.2','8.3','8.4']
+        #os: [bullseye,bookworm,alpine]
+        version: ['8.4']
+        os: [alpine]
         platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
     steps:
       - name: Checkout code
