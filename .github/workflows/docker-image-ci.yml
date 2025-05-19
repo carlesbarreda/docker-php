@@ -20,7 +20,7 @@ env:
   #IMAGE_NAME: ${{ github.repository }}
   IMAGE_NAME: 'carlesbarreda/php'
   LATEST_OS: 'alpine'
-  LATEST_VER: '8.3'
+  LATEST_VER: '8.4'
 
 permissions:
   contents: write
@@ -177,7 +177,7 @@ jobs:
       matrix:
         #version: ['7.4','8.0']
         #os: [bullseye,alpine]
-        version: ['8.1','8.2','8.3']
+        version: ['8.1','8.2','8.3','8.4']
         os: [bullseye,bookworm,alpine]
     steps:
       - name: Checkout code
@@ -299,7 +299,7 @@ jobs:
   #    matrix:
   #      #version: ['7.4','8.0']
   #      #os: [bullseye,alpine]
-  #      version: ['8.1','8.2','8.3']
+  #      version: ['8.1','8.2','8.3','8.4']
   #      os: [bullseye,bookworm,alpine]
   #  steps:
   #    - name: Checkout code
