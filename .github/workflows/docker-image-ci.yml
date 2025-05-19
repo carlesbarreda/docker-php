@@ -35,7 +35,8 @@ jobs:
       matrix:
         #version: ['7.4','8.0']
         #os: [bullseye,alpine]
-        version: ['8.1','8.2','8.3']
+        #version: ['8.1','8.2','8.3']
+        version: ['8.1','8.2','8.3','8.4']
         os: [bullseye,bookworm,alpine]
         platform: [linux/amd64,linux/arm64/v8,linux/arm/v7]
     steps:
